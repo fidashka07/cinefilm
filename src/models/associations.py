@@ -15,3 +15,19 @@ movie_genres = db.Table(
         primary_key=True,
     ),
 )
+
+user_follows = db.Table(
+    "user_follows",
+    db.Column(
+        "follower_id",
+        db.Integer,
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    db.Column(
+        "followed_id",
+        db.Integer,
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+)

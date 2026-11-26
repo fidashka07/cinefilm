@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
 from wtforms.validators import ValidationError
-
+from flask import abort
 from src.extensions import db
 from src.forms import ProfileForm
 from src.models import User
@@ -90,3 +90,56 @@ def edit_profile():
         )
 
     return render_template("profiles/edit.html", form=form)
+
+@profiles.post("/u/<string:username>/follow")
+@login_required
+def follow_user(username):
+    user = User.query.filter_by(username=username).first_or_404()
+
+    if current_user.id == user.id:
+        flash("You cannot follow yourself.", "error")
+        return redirect(url_for("profiles.view_profile", username=username))
+
+    if not current_user.is_following(user):
+        current_user.following.append(user)
+        db.session.commit()
+        flash(f"You are now following {user.username}.", "success")
+
+    return redirect(url_for("profiles.view_profile", username=username))
+
+
+@profiles.post("/u/<string:username>/unfollow")
+@login_required
+def unfollow_user(username):
+    user = User.query.filter_by(username=username).first_or_404()
+
+    if current_user.is_following(user):
+        current_user.following.remove(user)
+        db.session.commit()
+        flash(f"You unfollowed {user.username}.", "success")
+
+    return redirect(url_for("profiles.view_profile", username=username))
+
+
+@profiles.get("/u/<string:username>/followers")
+def view_followers(username):
+    user = User.query.filter_by(username=username).first_or_404()
+
+    return render_template(
+        "profiles/followers.html",
+        profile=user,
+        users=user.followers,
+        heading="Followers",
+    )
+
+
+@profiles.get("/u/<string:username>/following")
+def view_following(username):
+    user = User.query.filter_by(username=username).first_or_404()
+
+    return render_template(
+        "profiles/followers.html",
+        profile=user,
+        users=user.following,
+        heading="Following",
+    )

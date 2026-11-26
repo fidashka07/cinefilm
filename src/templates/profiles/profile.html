@@ -28,6 +28,51 @@
 
             <p class="profile-username">@{{ profile.username }}</p>
 
+            <div class="profile-stats">
+
+    <a href="{{ url_for('profiles.view_followers', username=profile.username) }}">
+        <strong>{{ profile.followers_count }}</strong>
+        <span>Followers</span>
+    </a>
+
+    <a href="{{ url_for('profiles.view_following', username=profile.username) }}">
+        <strong>{{ profile.following_count }}</strong>
+        <span>Following</span>
+    </a>
+
+</div>
+
+{% if current_user.is_authenticated and not is_owner %}
+
+    {% if current_user.is_following(profile) %}
+
+        <form method="POST"
+              action="{{ url_for('profiles.unfollow_user', username=profile.username) }}">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <button type="submit" class="follow-btn following-btn">
+                Following ✓
+            </button>
+
+        </form>
+
+    {% else %}
+
+        <form method="POST"
+              action="{{ url_for('profiles.follow_user', username=profile.username) }}">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <button type="submit" class="follow-btn">
+                + Follow
+            </button>
+
+        </form>
+
+    {% endif %}
+
+{% endif %}
             {% if profile.bio %}
                 <p class="profile-bio">{{ profile.bio }}</p>
             {% endif %}

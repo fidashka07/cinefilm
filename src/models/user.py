@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
-
+from src.models.associations import user_follows
 from src.extensions import db
 
 
@@ -62,6 +62,33 @@ class User(UserMixin, db.Model):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+
+    following = db.relationship(
+        "User",
+        secondary=user_follows,
+        primaryjoin=id == user_follows.c.follower_id,
+        secondaryjoin=id == user_follows.c.followed_id,
+        back_populates="followers",
+    )
+
+    followers = db.relationship(
+        "User",
+        secondary=user_follows,
+        primaryjoin=id == user_follows.c.followed_id,
+        secondaryjoin=id == user_follows.c.follower_id,
+        back_populates="following",
+    )
+
+    @property
+    def followers_count(self):
+        return len(self.followers)
+
+    @property
+    def following_count(self):
+        return len(self.following)
+
+    def is_following(self, user):
+        return user in self.following
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

@@ -1,9 +1,15 @@
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hero-slider.css') }}">
+{% endblock %}
+
 {% extends "base.html" %}
 
 {% block content %}
 
 <section class="hero" id="hero">
+
     <div class="hero-content">
+
         <span class="eyebrow">YOUR PERSONAL CINEMA UNIVERSE</span>
 
         <h1>Every film has<br>a <span>story.</span></h1>
@@ -23,17 +29,41 @@
             <span>✦ RATE</span>
             <span>✦ COLLECT</span>
         </div>
+
     </div>
 
     <div class="hero-image" id="hero-image">
-        <div class="hero-image-overlay"></div>
-        <div class="featured-label">FEATURED FILM</div>
-        <div class="featured-info">
-            <span id="hero-year"></span>
-            <h2 id="hero-title">Your next favorite film awaits.</h2>
-            <span id="hero-rating"></span>
+
+        <div class="featured-label" id="hero-label">
+            THE LEGENDARY SERIES
         </div>
+
+        <div class="featured-info">
+
+            <span id="hero-year"></span>
+
+            <h2 id="hero-title">Attack on Titan</h2>
+
+            <span id="hero-rating"></span>
+
+            <p id="hero-overview"></p>
+
+        </div>
+
+        <div class="hero-slider-controls">
+
+            <button id="hero-prev" aria-label="Previous featured movie">←</button>
+
+            <div id="hero-dots"></div>
+
+            <button id="hero-next" aria-label="Next featured movie">→</button>
+
+        </div>
+
+        <span class="hero-slide-counter" id="hero-counter">01 / 01</span>
+
     </div>
+
 </section>
 
 
@@ -48,79 +78,122 @@
         <input
             type="text"
             id="movie-search"
-            placeholder="Search movies in these collections..."
+            placeholder="Search movies across all collections..."
         >
     </div>
 </section>
 
 
-<section class="movie-section" id="trending">
+{% set collections = [
+    {
+        "id": "trending",
+        "number": "01",
+        "eyebrow": "WHAT EVERYONE IS WATCHING",
+        "title": "Trending",
+        "highlight": "now",
+        "loading": "Discovering trending films..."
+    },
+    {
+        "id": "popular",
+        "number": "02",
+        "eyebrow": "CROWD FAVORITES",
+        "title": "Popular",
+        "highlight": "films",
+        "loading": "Loading popular films..."
+    },
+    {
+        "id": "top-rated",
+        "number": "03",
+        "eyebrow": "THE BEST OF CINEMA",
+        "title": "All-time",
+        "highlight": "greats",
+        "loading": "Finding the greatest films..."
+    },
+    {
+        "id": "upcoming",
+        "number": "04",
+        "eyebrow": "COMING TO THE BIG SCREEN",
+        "title": "Coming",
+        "highlight": "soon",
+        "loading": "Loading upcoming films..."
+    }
+] %}
+
+
+{% for collection in collections %}
+<section class="movie-section" id="{{ collection.id }}">
+
     <div class="section-heading">
         <div>
-            <span class="eyebrow">WHAT EVERYONE IS WATCHING</span>
-            <h2>Trending <span>now.</span></h2>
+            <span class="eyebrow">{{ collection.eyebrow }}</span>
+
+            <h2>
+                {{ collection.title }}
+                <span>{{ collection.highlight }}.</span>
+            </h2>
         </div>
-        <span class="section-number">01 / TRENDING</span>
-    </div>
 
-    <div class="movie-grid" id="trending-grid">
-        <p class="loading">Discovering trending films...</p>
-    </div>
-</section>
+        <div class="reel-controls">
+            <span class="section-number">
+                {{ collection.number }} / {{ collection.id | upper }}
+            </span>
 
+            <button
+                class="reel-arrow"
+                data-direction="-1"
+                aria-label="Scroll left"
+            >←</button>
 
-<section class="movie-section" id="popular">
-    <div class="section-heading">
-        <div>
-            <span class="eyebrow">CROWD FAVORITES</span>
-            <h2>Popular <span>films.</span></h2>
+            <button
+                class="reel-arrow"
+                data-direction="1"
+                aria-label="Scroll right"
+            >→</button>
         </div>
-        <span class="section-number">02 / POPULAR</span>
     </div>
 
-    <div class="movie-grid" id="popular-grid">
-        <p class="loading">Loading popular films...</p>
-    </div>
-</section>
+    <div class="reel-shell" data-reel="{{ collection.id }}">
 
-
-<section class="movie-section" id="top-rated">
-    <div class="section-heading">
-        <div>
-            <span class="eyebrow">THE BEST OF CINEMA</span>
-            <h2>All-time <span>greats.</span></h2>
+        <div class="reel-top-label">
+            <span>CINEFILM ORIGINAL</span>
+            <span>35MM · 24 FPS</span>
         </div>
-        <span class="section-number">03 / TOP RATED</span>
-    </div>
 
-    <div class="movie-grid" id="top-rated-grid">
-        <p class="loading">Finding the greatest films...</p>
-    </div>
-</section>
+        <div class="movie-grid film-track"
+             id="{{ collection.id }}-grid">
 
+            <p class="loading">{{ collection.loading }}</p>
 
-<section class="movie-section" id="upcoming">
-    <div class="section-heading">
-        <div>
-            <span class="eyebrow">COMING TO THE BIG SCREEN</span>
-            <h2>Coming <span>soon.</span></h2>
         </div>
-        <span class="section-number">04 / UPCOMING</span>
+
+        <div class="reel-bottom-label">
+            <span>FRAME 001</span>
+            <span>YOUR CINEMATIC COLLECTION</span>
+        </div>
+
     </div>
 
-    <div class="movie-grid" id="upcoming-grid">
-        <p class="loading">Loading upcoming films...</p>
-    </div>
+    <p class="reel-hint">
+        DRAG TO EXPLORE <span>·</span> SCROLL TO MOVE <span>·</span> SELECT A FILM
+    </p>
+
 </section>
+{% endfor %}
 
 
 <section class="community-banner">
     <div>
         <span class="eyebrow">YOUR CINEMATIC JOURNEY STARTS HERE</span>
-        <h2>Don't just watch movies.<br><span>Make them memories.</span></h2>
+
+        <h2>
+            Don't just watch movies.<br>
+            <span>Make them memories.</span>
+        </h2>
     </div>
 
-    <a href="/auth/register" class="primary-btn">Create your account ↗</a>
+    <a href="/auth/register" class="primary-btn">
+        Create your account ↗
+    </a>
 </section>
 
 {% endblock %}

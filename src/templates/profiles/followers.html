@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{{ heading }} — {{ profile.username }} | CINEFILM{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<section class="profile-page">
+
+    <div class="section-heading">
+        <span class="eyebrow">@{{ profile.username }} / COMMUNITY</span>
+        <h1>{{ heading }}</h1>
+    </div>
+
+    <div class="followers-list">
+
+        {% for user in users %}
+
+            <a href="{{ url_for('profiles.view_profile', username=user.username) }}"
+               class="follower-card">
+
+                <div class="follower-avatar">
+
+                    {% if user.avatar_url %}
+                        <img src="{{ user.avatar_url }}" alt="">
+                    {% else %}
+                        {{ user.username[0]|upper }}
+                    {% endif %}
+
+                </div>
+
+                <div>
+                    <h3>{{ user.display_name or user.username }}</h3>
+                    <span>@{{ user.username }}</span>
+                </div>
+
+                <span class="follower-arrow">↗</span>
+
+            </a>
+
+        {% else %}
+
+            <p class="empty-profile">
+                Nobody here yet.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}
