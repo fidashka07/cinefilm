@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in | CINEFILM</title>
+</head>
+<body>
+
+    <main>
+        <a href="{{ url_for('index') }}">CINEFILM</a>
+
+        <h1>Welcome back</h1>
+        <p>Your next favorite film is waiting.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div>
+                {{ form.email.label }}
+                {{ form.email(placeholder="Your email address") }}
+                {% for error in form.email.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form.password.label }}
+                {{ form.password(placeholder="Your password") }}
+                {% for error in form.password.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form.remember_me() }}
+                {{ form.remember_me.label }}
+            </div>
+
+            {{ form.submit() }}
+        </form>
+
+        <p>
+            Don't have an account?
+            <a href="{{ url_for('auth.register') }}">Create one</a>
+        </p>
+    </main>
+
+</body>
+</html>

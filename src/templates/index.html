@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="hero" id="hero">
+    <div class="hero-content">
+        <span class="eyebrow">YOUR PERSONAL CINEMA UNIVERSE</span>
+
+        <h1>Every film has<br>a <span>story.</span></h1>
+
+        <p>
+            Discover extraordinary films, keep track of your cinematic
+            journey, and find your next obsession.
+        </p>
+
+        <div class="hero-actions">
+            <a href="#trending" class="primary-btn">Explore Films ↗</a>
+            <a href="/auth/register" class="secondary-btn">Join the community</a>
+        </div>
+
+        <div class="hero-meta">
+            <span>✦ DISCOVER</span>
+            <span>✦ RATE</span>
+            <span>✦ COLLECT</span>
+        </div>
+    </div>
+
+    <div class="hero-image" id="hero-image">
+        <div class="hero-image-overlay"></div>
+        <div class="featured-label">FEATURED FILM</div>
+        <div class="featured-info">
+            <span id="hero-year"></span>
+            <h2 id="hero-title">Your next favorite film awaits.</h2>
+            <span id="hero-rating"></span>
+        </div>
+    </div>
+</section>
+
+
+<section class="search-section">
+    <div>
+        <span class="eyebrow">THE WORLD OF CINEMA</span>
+        <h2>Find your next <span>favorite.</span></h2>
+    </div>
+
+    <div class="search-box">
+        <span>⌕</span>
+        <input
+            type="text"
+            id="movie-search"
+            placeholder="Search movies in these collections..."
+        >
+    </div>
+</section>
+
+
+<section class="movie-section" id="trending">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">WHAT EVERYONE IS WATCHING</span>
+            <h2>Trending <span>now.</span></h2>
+        </div>
+        <span class="section-number">01 / TRENDING</span>
+    </div>
+
+    <div class="movie-grid" id="trending-grid">
+        <p class="loading">Discovering trending films...</p>
+    </div>
+</section>
+
+
+<section class="movie-section" id="popular">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">CROWD FAVORITES</span>
+            <h2>Popular <span>films.</span></h2>
+        </div>
+        <span class="section-number">02 / POPULAR</span>
+    </div>
+
+    <div class="movie-grid" id="popular-grid">
+        <p class="loading">Loading popular films...</p>
+    </div>
+</section>
+
+
+<section class="movie-section" id="top-rated">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">THE BEST OF CINEMA</span>
+            <h2>All-time <span>greats.</span></h2>
+        </div>
+        <span class="section-number">03 / TOP RATED</span>
+    </div>
+
+    <div class="movie-grid" id="top-rated-grid">
+        <p class="loading">Finding the greatest films...</p>
+    </div>
+</section>
+
+
+<section class="movie-section" id="upcoming">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">COMING TO THE BIG SCREEN</span>
+            <h2>Coming <span>soon.</span></h2>
+        </div>
+        <span class="section-number">04 / UPCOMING</span>
+    </div>
+
+    <div class="movie-grid" id="upcoming-grid">
+        <p class="loading">Loading upcoming films...</p>
+    </div>
+</section>
+
+
+<section class="community-banner">
+    <div>
+        <span class="eyebrow">YOUR CINEMATIC JOURNEY STARTS HERE</span>
+        <h2>Don't just watch movies.<br><span>Make them memories.</span></h2>
+    </div>
+
+    <a href="/auth/register" class="primary-btn">Create your account ↗</a>
+</section>
+
+{% endblock %}

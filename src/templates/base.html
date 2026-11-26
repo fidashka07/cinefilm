@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}CINEFILM — Your Cinema Universe{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+
+<body>
+
+    <header class="navbar">
+        <a href="/" class="logo">
+            CINE<span>FILM</span><i>.</i>
+        </a>
+
+        <nav class="nav-links">
+            <a href="/">Discover</a>
+            <a href="#trending">Trending</a>
+            <a href="#popular">Popular</a>
+            <a href="#top-rated">Top Rated</a>
+        </nav>
+
+        <div class="nav-actions">
+            <a href="/auth/login" class="login-link">Log in</a>
+            <a href="/auth/register" class="signup-btn">Join CINEFILM</a>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-logo">CINEFILM<span>.</span></div>
+        <p>Made for people who live and breathe cinema.</p>
+        <small>Movie data powered by TMDB.</small>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

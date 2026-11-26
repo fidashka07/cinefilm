@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join CINEFILM</title>
+</head>
+<body>
+
+    <main>
+        <a href="{{ url_for('index') }}">CINEFILM</a>
+
+        <h1>Create your account</h1>
+        <p>Your cinematic journey starts here.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div>
+                {{ form.username.label }}
+                {{ form.username(placeholder="Choose a username") }}
+                {% for error in form.username.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form.email.label }}
+                {{ form.email(placeholder="Your email address") }}
+                {% for error in form.email.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form.password.label }}
+                {{ form.password(placeholder="At least 8 characters") }}
+                {% for error in form.password.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form.confirm_password.label }}
+                {{ form.confirm_password(placeholder="Confirm your password") }}
+                {% for error in form.confirm_password.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            {{ form.submit() }}
+        </form>
+
+        <p>
+            Already have an account?
+            <a href="{{ url_for('auth.login') }}">Log in</a>
+        </p>
+    </main>
+
+</body>
+</html>
