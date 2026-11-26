@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-
+from src.routes.profiles import profiles
 from src import models
 from src.config import Config
 from src.extensions import (
@@ -36,6 +36,7 @@ def create_app(config_class=Config):
 
     app.register_blueprint(auth)
     app.register_blueprint(movies)
+    app.register_blueprint(profiles)
     @app.route("/")
     def index():
         return render_template("index.html")    

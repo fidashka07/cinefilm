@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile.display_name or profile.username }} — CINEFILM{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<section class="profile-page">
+
+    <div class="profile-header">
+
+        <div class="profile-avatar">
+            {% if profile.avatar_url %}
+                <img src="{{ profile.avatar_url }}" alt="{{ profile.username }}'s profile picture">
+            {% else %}
+                <span>{{ profile.username[0]|upper }}</span>
+            {% endif %}
+        </div>
+
+        <div class="profile-information">
+
+            <span class="profile-label">CINEFILM MEMBER</span>
+
+            <h1>{{ profile.display_name or profile.username }}</h1>
+
+            <p class="profile-username">@{{ profile.username }}</p>
+
+            {% if profile.bio %}
+                <p class="profile-bio">{{ profile.bio }}</p>
+            {% endif %}
+
+            <div class="profile-socials">
+                {% if profile.website_url %}
+                    <a href="{{ profile.website_url }}" target="_blank" rel="noopener noreferrer">
+                        Website ↗
+                    </a>
+                {% endif %}
+
+                {% if profile.instagram_url %}
+                    <a href="{{ profile.instagram_url }}" target="_blank" rel="noopener noreferrer">
+                        Instagram ↗
+                    </a>
+                {% endif %}
+            </div>
+
+            {% if is_owner %}
+                <a href="{{ url_for('profiles.edit_profile') }}" class="profile-edit-btn">
+                    Edit profile
+                </a>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="profile-section">
+        <div class="section-heading">
+            <span>01 / PERSONAL TASTE</span>
+            <h2>Favorite genres</h2>
+        </div>
+
+        {% if profile.favorite_genres %}
+            <div class="genre-list">
+                {% for genre in profile.favorite_genres %}
+                    <span>{{ genre }}</span>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-profile">No favorite genres added yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="profile-section">
+        <div class="section-heading">
+            <span>02 / THE ESSENTIALS</span>
+            <h2>Top 5 movies</h2>
+        </div>
+
+        {% if profile.top_movies %}
+            <div class="profile-list">
+                {% for movie in profile.top_movies %}
+                    <div class="profile-list-item">
+                        <span class="list-number">0{{ loop.index }}</span>
+                        <h3>{{ movie }}</h3>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-profile">No favorite movies added yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="profile-section">
+        <div class="section-heading">
+            <span>03 / CINEMA ICONS</span>
+            <h2>Top 5 actors</h2>
+        </div>
+
+        {% if profile.top_actors %}
+            <div class="profile-list">
+                {% for actor in profile.top_actors %}
+                    <div class="profile-list-item">
+                        <span class="list-number">0{{ loop.index }}</span>
+                        <h3>{{ actor }}</h3>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-profile">No favorite actors added yet.</p>
+        {% endif %}
+    </div>
+
+</section>
+
+{% endblock %}

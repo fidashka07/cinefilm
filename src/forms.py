@@ -9,7 +9,8 @@ from wtforms.validators import (
 )
 
 from src.models import User
-
+from wtforms import TextAreaField
+from wtforms.validators import Optional
 
 class RegistrationForm(FlaskForm):
     username = StringField(
@@ -70,3 +71,37 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField("Remember me")
 
     submit = SubmitField("Log in")
+    
+class ProfileForm(FlaskForm):
+    display_name = StringField(
+        "Display name",
+        validators=[Optional(), Length(max=60)],
+    )
+
+    bio = TextAreaField(
+        "About me",
+        validators=[Optional(), Length(max=500)],
+    )
+
+    avatar_url = StringField(
+        "Profile picture URL",
+        validators=[Optional(), Length(max=500)],
+    )
+
+    website_url = StringField(
+        "Website",
+        validators=[Optional(), Length(max=500)],
+    )
+
+    instagram_url = StringField(
+        "Instagram URL",
+        validators=[Optional(), Length(max=500)],
+    )
+
+    favorite_genres = TextAreaField("Favorite genres")
+
+    top_movies = TextAreaField("Top 5 movies")
+
+    top_actors = TextAreaField("Top 5 actors")
+
+    submit = SubmitField("Save changes")

@@ -15,8 +15,16 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
 
+    display_name = db.Column(db.String(60))
     bio = db.Column(db.String(500))
     avatar_url = db.Column(db.String(500))
+
+    website_url = db.Column(db.String(500))
+    instagram_url = db.Column(db.String(500))
+
+    favorite_genres = db.Column(db.JSON, default=list, nullable=False)
+    top_movies = db.Column(db.JSON, default=list, nullable=False)
+    top_actors = db.Column(db.JSON, default=list, nullable=False)
 
     created_at = db.Column(
         db.DateTime(timezone=True),
