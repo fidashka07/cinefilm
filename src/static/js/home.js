@@ -694,3 +694,196 @@ collections.forEach(collection => {
         });
     }
 })();
+
+// ========================================
+// MOOD-BASED FILM DISCOVERY
+// ========================================
+
+const moodNames = {
+    happy: "Feel-good films",
+    heartbroken: "Films for a broken heart",
+    romantic: "Stories about love",
+    "mind-blown": "Films that challenge your mind",
+    melancholic: "Deep and atmospheric cinema",
+    motivated: "Films that inspire",
+    thrilled: "Edge-of-your-seat cinema",
+    adventurous: "Extraordinary adventures"
+};
+
+let selectedMood = null;
+let moodPage = 1;
+let moodTotalPages = 1;
+let moodLoading = false;
+
+const moodCards = document.querySelectorAll(".mood-card");
+const moodResults = document.getElementById("mood-results");
+const moodFilmGrid = document.getElementById("mood-film-grid");
+const moodResultsTitle = document.getElementById("mood-results-title");
+const moodLoadMore = document.getElementById("mood-load-more");
+
+
+async function loadMoodMovies(mood, page = 1) {
+    if (moodLoading) return;
+
+    moodLoading = true;
+
+    if (page === 1) {
+        moodFilmGrid.innerHTML = `
+            <p class="loading">Finding films that match your mood...</p>
+        `;
+    }
+
+    moodLoadMore.disabled = true;
+
+    try {
+        const response = await fetch(
+            `/movies/mood/${encodeURIComponent(mood)}?page=${page}`
+        );
+
+        if (!response.ok) {
+            throw new Error("Unable to find mood recommendations.");
+        }
+
+        const data = await response.json();
+
+        moodPage = data.page;
+        moodTotalPages = data.total_pages;
+
+        const movies = data.movies || [];
+
+        if (page === 1 && !movies.length) {
+            moodFilmGrid.innerHTML = `
+                <p class="loading">No films found. Try another mood.</p>
+            `;
+            return;
+        }
+
+        const cards = movies.map((movie, index) => {
+            const poster = movie.poster_path
+                ? `${IMAGE_BASE}w500${movie.poster_path}`
+                : null;
+
+            const year = movie.release_date
+                ? movie.release_date.substring(0, 4)
+                : "N/A";
+
+            const rating = Number(
+                movie.vote_average || 0
+            ).toFixed(1);
+
+            return `
+                <article
+                    class="movie-card"
+                    data-movie-id="${movie.tmdb_id}"
+                    tabindex="0"
+                    role="button"
+                    aria-label="View ${escapeHTML(movie.title)} details"
+                >
+                    <div class="frame-number">
+                        FRAME ${String((page - 1) * 20 + index + 1).padStart(3, "0")}
+                    </div>
+
+                    <div class="poster-wrapper">
+                        ${
+                            poster
+                            ? `
+                                <img
+                                    src="${poster}"
+                                    alt="${escapeHTML(movie.title)}"
+                                    loading="lazy"
+                                >
+                            `
+                            : `<div class="poster-placeholder">NO POSTER</div>`
+                        }
+
+                        <div class="poster-overlay">
+                            <span>★ ${rating}</span>
+                            <span class="view-film">VIEW FILM ↗</span>
+                        </div>
+                    </div>
+
+                    <div class="movie-info">
+                        <h3>${escapeHTML(movie.title)}</h3>
+
+                        <div class="movie-meta">
+                            <span>${year}</span>
+                            <span>★ ${rating}</span>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }).join("");
+
+        if (page === 1) {
+            moodFilmGrid.innerHTML = cards;
+        } else {
+            moodFilmGrid.insertAdjacentHTML("beforeend", cards);
+        }
+
+        moodLoadMore.hidden = moodPage >= moodTotalPages;
+
+    } catch (error) {
+        if (page === 1) {
+            moodFilmGrid.innerHTML = `
+                <p class="error-message">
+                    Unable to load recommendations. Please try again.
+                </p>
+            `;
+        }
+
+        console.error(error);
+
+    } finally {
+        moodLoading = false;
+        moodLoadMore.disabled = false;
+    }
+}
+
+
+moodCards.forEach(card => {
+    card.addEventListener("click", () => {
+        const mood = card.dataset.mood;
+
+        selectedMood = mood;
+        moodPage = 1;
+
+        moodCards.forEach(item => {
+            item.classList.toggle("selected", item === card);
+            item.setAttribute(
+                "aria-pressed",
+                item === card ? "true" : "false"
+            );
+        });
+
+        moodResults.hidden = false;
+
+        moodResultsTitle.textContent = moodNames[mood];
+
+        loadMoodMovies(mood, 1);
+
+        moodResults.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    });
+});
+
+
+document.getElementById("clear-mood").addEventListener("click", () => {
+    selectedMood = null;
+    moodPage = 1;
+
+    moodCards.forEach(card => {
+        card.classList.remove("selected");
+        card.setAttribute("aria-pressed", "false");
+    });
+
+    moodResults.hidden = true;
+});
+
+
+moodLoadMore.addEventListener("click", () => {
+    if (!selectedMood || moodPage >= moodTotalPages) return;
+
+    loadMoodMovies(selectedMood, moodPage + 1);
+});

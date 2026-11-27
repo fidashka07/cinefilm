@@ -37,45 +37,89 @@ def get_movies(category):
         if page < 1:
             return jsonify({"error": "Invalid page number."}), 400
 
-        result = get_movie_service().get_movies(
-            category,
-            page,
-        )
+        result = get_movie_service().get_movies(category, page)
 
-        return jsonify(
-            {
-                "page": result["page"],
-                "total_pages": result["total_pages"],
-                "total_results": result["total_results"],
-                "movies": [
-                    {
-                        "id": movie.id,
-                        "tmdb_id": movie.tmdb_id,
-                        "title": movie.title,
-                        "overview": movie.overview,
-                        "release_date": (
-                            movie.release_date.isoformat()
-                            if movie.release_date
-                            else None
-                        ),
-                        "poster_path": movie.poster_path,
-                        "backdrop_path": movie.backdrop_path,
-                        "vote_average": movie.vote_average,
-                        "popularity": movie.popularity,
-                        "genres": [
-                            genre.name for genre in movie.genres
-                        ],
-                    }
-                    for movie in result["movies"]
-                ],
-            }
-        )
+        return jsonify({
+            "page": result["page"],
+            "total_pages": result["total_pages"],
+            "total_results": result["total_results"],
+            "movies": [
+                {
+                    "id": movie.id,
+                    "tmdb_id": movie.tmdb_id,
+                    "title": movie.title,
+                    "overview": movie.overview,
+                    "release_date": (
+                        movie.release_date.isoformat()
+                        if movie.release_date else None
+                    ),
+                    "poster_path": movie.poster_path,
+                    "backdrop_path": movie.backdrop_path,
+                    "vote_average": movie.vote_average,
+                    "popularity": movie.popularity,
+                    "genres": [genre.name for genre in movie.genres],
+                }
+                for movie in result["movies"]
+            ],
+        })
 
     except TMDBError:
         current_app.logger.exception("TMDB request failed.")
-        return jsonify(
-            {"error": "Movie service is temporarily unavailable."}
-        ), 502
+        return jsonify({
+            "error": "Movie service is temporarily unavailable."
+        }), 502
+
+
+@movies.get("/mood/<mood>")
+def get_movies_by_mood(mood):
+    allowed_moods = {
+        "happy",
+        "heartbroken",
+        "romantic",
+        "mind-blown",
+        "melancholic",
+        "motivated",
+        "thrilled",
+        "adventurous",
+    }
+
+    if mood not in allowed_moods:
+        return jsonify({"error": "Invalid mood."}), 404
+
+    page = request.args.get("page", 1, type=int)
+
+    if page < 1:
+        return jsonify({"error": "Invalid page number."}), 400
+
+    try:
+        result = get_movie_service().get_movies_by_mood(mood, page)
+
+        return jsonify({
+            "page": result.get("page", page),
+            "total_pages": result.get("total_pages", 1),
+            "total_results": result.get("total_results", 0),
+            "movies": [
+                {
+                    "tmdb_id": movie["id"],
+                    "title": movie.get("title"),
+                    "overview": movie.get("overview"),
+                    "release_date": movie.get("release_date"),
+                    "poster_path": movie.get("poster_path"),
+                    "backdrop_path": movie.get("backdrop_path"),
+                    "vote_average": movie.get("vote_average"),
+                    "genres": movie.get("genre_ids", []),
+                }
+                for movie in result.get("results", [])
+            ],
+        })
+
+    except TMDBError:
+        current_app.logger.exception(
+            "TMDB mood recommendation request failed."
+        )
+        return jsonify({
+            "error": "Mood recommendations are temporarily unavailable."
+        }), 502
 
 
 @movies.get("/details/<int:tmdb_id>")

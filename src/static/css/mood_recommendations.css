@@ -1,0 +1,237 @@
+/* ========================================
+   MOOD DISCOVERY
+======================================== */
+
+.mood-section {
+    padding: 85px 7%;
+    position: relative;
+}
+
+.mood-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 30px;
+    margin-bottom: 38px;
+}
+
+.mood-heading h2 {
+    font-family: "DM Serif Display", serif;
+    font-size: clamp(36px, 5vw, 56px);
+    margin-top: 12px;
+    color: var(--text);
+}
+
+.mood-heading h2 span {
+    color: var(--accent);
+}
+
+.mood-heading p {
+    margin-top: 12px;
+    max-width: 510px;
+    line-height: 1.7;
+    color: var(--muted);
+}
+
+.mood-edition {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    white-space: nowrap;
+    padding-bottom: 8px;
+}
+
+.mood-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.mood-card {
+    min-height: 175px;
+    padding: 25px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(
+        145deg,
+        rgba(255,255,255,0.055),
+        rgba(255,255,255,0.015)
+    );
+    border-radius: 12px;
+    color: var(--text);
+    cursor: pointer;
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        background 0.25s ease;
+}
+
+.mood-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+    background: rgba(232,164,91,0.08);
+}
+
+.mood-card.selected {
+    border-color: var(--accent);
+    background: rgba(232,164,91,0.13);
+    box-shadow: 0 0 25px rgba(232,164,91,0.08);
+}
+
+.mood-emoji {
+    font-size: 30px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.mood-name {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.mood-description {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.mood-results {
+    margin-top: 65px;
+    scroll-margin-top: 100px;
+}
+
+.mood-results[hidden] {
+    display: none;
+}
+
+.mood-results-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+.mood-results-heading h3 {
+    font-family: "DM Serif Display", serif;
+    font-size: 32px;
+    margin-top: 8px;
+}
+
+#clear-mood {
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: var(--muted);
+    padding: 12px 18px;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+#clear-mood:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.mood-film-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 25px 18px;
+}
+
+.mood-film-grid .movie-card {
+    min-width: 0;
+}
+
+.mood-load-more {
+    display: block;
+    margin: 45px auto 0;
+    padding: 15px 30px;
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.mood-load-more:hover {
+    background: var(--accent);
+    color: #100f12;
+}
+
+.mood-load-more:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+.mood-load-more[hidden] {
+    display: none;
+}
+
+@media (max-width: 1000px) {
+    .mood-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mood-film-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .mood-section {
+        padding: 55px 5%;
+    }
+
+    .mood-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .mood-edition {
+        display: none;
+    }
+
+    .mood-grid {
+        gap: 10px;
+    }
+
+    .mood-card {
+        min-height: 145px;
+        padding: 17px;
+    }
+
+    .mood-name {
+        font-size: 15px;
+    }
+
+    .mood-description {
+        font-size: 11px;
+    }
+
+    .mood-film-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 12px;
+    }
+
+    .mood-results-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .mood-results-heading h3 {
+        font-size: 26px;
+    }
+}

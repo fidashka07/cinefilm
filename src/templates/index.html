@@ -1,8 +1,9 @@
-{% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hero-slider.css') }}">
-{% endblock %}
-
 {% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hero_slider.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mood_recommendations.css') }}">
+{% endblock %}
 
 {% block content %}
 
@@ -83,6 +84,105 @@
     </div>
 </section>
 
+<!-- ========================================
+     MOOD-BASED RECOMMENDATIONS
+======================================== -->
+
+<section class="mood-section" id="mood-discovery">
+
+    <div class="mood-heading">
+        <div>
+            <span class="eyebrow">CINEMA MEETS EMOTION</span>
+
+            <h2>
+                What's your <span>mood?</span>
+            </h2>
+
+            <p>
+                Every feeling deserves a film.
+                Tell us how you feel, and we'll find your next watch.
+            </p>
+        </div>
+
+        <span class="mood-edition">CINEFILM ORIGINAL · 001</span>
+    </div>
+
+    <div class="mood-grid">
+
+        <button class="mood-card" data-mood="happy">
+            <span class="mood-emoji">☀</span>
+            <span class="mood-name">Happy</span>
+            <span class="mood-description">Make me smile</span>
+        </button>
+
+        <button class="mood-card" data-mood="heartbroken">
+            <span class="mood-emoji">♡</span>
+            <span class="mood-name">Heartbroken</span>
+            <span class="mood-description">I need a good cry</span>
+        </button>
+
+        <button class="mood-card" data-mood="romantic">
+            <span class="mood-emoji">♥</span>
+            <span class="mood-name">Romantic</span>
+            <span class="mood-description">Love is in the air</span>
+        </button>
+
+        <button class="mood-card" data-mood="mind-blown">
+            <span class="mood-emoji">✧</span>
+            <span class="mood-name">Mind-blown</span>
+            <span class="mood-description">Challenge my mind</span>
+        </button>
+
+        <button class="mood-card" data-mood="melancholic">
+            <span class="mood-emoji">☾</span>
+            <span class="mood-name">Melancholic</span>
+            <span class="mood-description">Something profound</span>
+        </button>
+
+        <button class="mood-card" data-mood="motivated">
+            <span class="mood-emoji">✦</span>
+            <span class="mood-name">Motivated</span>
+            <span class="mood-description">Inspire me</span>
+        </button>
+
+        <button class="mood-card" data-mood="thrilled">
+            <span class="mood-emoji">⚡</span>
+            <span class="mood-name">Thrilled</span>
+            <span class="mood-description">Keep me on edge</span>
+        </button>
+
+        <button class="mood-card" data-mood="adventurous">
+            <span class="mood-emoji">✧</span>
+            <span class="mood-name">Adventurous</span>
+            <span class="mood-description">Take me elsewhere</span>
+        </button>
+
+    </div>
+
+    <div class="mood-results" id="mood-results" hidden>
+
+        <div class="mood-results-heading">
+            <div>
+                <span class="eyebrow">YOUR CINEMATIC MATCH</span>
+                <h3 id="mood-results-title">Films for your mood.</h3>
+            </div>
+
+            <button id="clear-mood" type="button">
+                CHANGE MOOD ×
+            </button>
+        </div>
+
+        <div class="movie-grid mood-film-grid" id="mood-film-grid">
+            <p class="loading">Finding your films...</p>
+        </div>
+
+        <button id="mood-load-more" class="mood-load-more" type="button">
+            DISCOVER MORE FILMS ↗
+        </button>
+
+    </div>
+
+</section>
 
 {% set collections = [
     {

@@ -1,5 +1,14 @@
 from src.repositories.movie_repository import MovieRepository
-
+MOOD_GENRES = {
+    "happy": "35",
+    "heartbroken": "18",
+    "romantic": "10749",
+    "mind-blown": "9648|53",
+    "melancholic": "18|14",
+    "motivated": "18|12",
+    "thrilled": "53|27",
+    "adventurous": "12|14",
+}
 
 class MovieService:
     """Coordinates TMDB data retrieval and database persistence."""
@@ -41,3 +50,17 @@ class MovieService:
         except Exception:
             MovieRepository.rollback()
             raise
+    def get_movies_by_mood(self, mood, page=1):
+        if mood not in MOOD_GENRES:
+            raise ValueError("Invalid mood.")
+
+        if page < 1:
+            raise ValueError("Page must be greater than zero.")
+
+        return self.tmdb.discover_movies({
+            "with_genres": MOOD_GENRES[mood],
+            "sort_by": "popularity.desc",
+            "include_adult": False,
+            "vote_count.gte": 50,
+            "page": page,
+        })

@@ -89,3 +89,8 @@ class TMDBClient:
             endpoints[category],
             params={"page": page},
         )
+    def discover_movies(self, params=None):
+        return self.get(
+            "discover/movie",
+            params=params or {},
+        )
