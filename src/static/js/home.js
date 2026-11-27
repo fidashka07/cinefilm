@@ -111,6 +111,8 @@ function renderMovies(movies, container) {
                         <span>${year}</span>
                         <span>★ ${rating}</span>
                     </div>
+
+                    <button class="watchlist-btn" data-watchlist-id="${movie.tmdb_id}" type="button">＋ Watchlist</button>
                 </div>
 
             </article>
@@ -208,9 +210,11 @@ function addHeroMovies() {
 
     renderHeroDots();
 
-    if (currentHeroIndex === 0) {
-        updateHeroSlide(0);
-    }
+if (currentHeroIndex === 0) {
+    updateHeroSlide(0);
+}
+
+startHeroTimer();
 }
 
 
@@ -278,14 +282,28 @@ function changeHeroSlide(direction) {
 
 function renderHeroDots() {
     const container = document.getElementById("hero-dots");
-
     if (!container) return;
 
-    container.innerHTML = heroMovies.map((movie, index) => `
+    const maxDots = 7;
+    const total = heroMovies.length;
+
+    const start = Math.max(
+        0,
+        Math.min(currentHeroIndex - 3, total - maxDots)
+    );
+
+    const end = Math.min(total, start + maxDots);
+
+    container.innerHTML = Array.from(
+        { length: end - start },
+        (_, i) => start + i
+    ).map(index => `
         <button
             class="hero-dot ${index === currentHeroIndex ? "active" : ""}"
             aria-label="Show featured movie ${index + 1}"
+            aria-current="${index === currentHeroIndex ? "true" : "false"}"
             data-index="${index}"
+            type="button"
         ></button>
     `).join("");
 
@@ -668,13 +686,14 @@ collections.forEach(collection => {
 
     const startTime = performance.now();
     const minimumDisplayTime = 1900;
+    let hiding = false;
 
     function hideLoader() {
+        if (hiding) return;
+        hiding = true;
+
         const elapsed = performance.now() - startTime;
-        const remaining = Math.max(
-            0,
-            minimumDisplayTime - elapsed
-        );
+        const remaining = Math.max(0, minimumDisplayTime - elapsed);
 
         window.setTimeout(() => {
             loader.classList.add("is-hidden");
@@ -686,13 +705,16 @@ collections.forEach(collection => {
         }, remaining);
     }
 
-    if (document.readyState === "complete") {
-        hideLoader();
-    } else {
-        window.addEventListener("load", hideLoader, {
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", hideLoader, {
             once: true
         });
+    } else {
+        hideLoader();
     }
+
+    // Fallback in case something delays page loading.
+    window.setTimeout(hideLoader, 5000);
 })();
 
 // ========================================
@@ -809,6 +831,8 @@ async function loadMoodMovies(mood, page = 1) {
                             <span>${year}</span>
                             <span>★ ${rating}</span>
                         </div>
+
+                        <button class="watchlist-btn" data-watchlist-id="${movie.tmdb_id}" type="button">＋ Watchlist</button>
                     </div>
                 </article>
             `;
@@ -887,3 +911,49 @@ moodLoadMore.addEventListener("click", () => {
 
     loadMoodMovies(selectedMood, moodPage + 1);
 });
+
+document.addEventListener("click", async event => {
+    const button = event.target.closest(".watchlist-btn");
+
+    if (!button) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const movieId = button.dataset.watchlistId;
+
+    button.disabled = true;
+
+    try {
+        const response = await fetch(`/movies/watchlist/${movieId}`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken()
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.status === 401) {
+            window.location.href = "/auth/login";
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(data.error || data.message || "Unable to add movie.");
+        }
+
+        button.textContent = "✓ Added";
+        button.classList.add("watchlist-added");
+
+    } catch (error) {
+        alert(error.message);
+        button.disabled = false;
+    }
+});
+
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content
+        || document.querySelector('input[name="csrf_token"]')?.value
+        || "";
+}

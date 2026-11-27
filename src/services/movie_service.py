@@ -16,6 +16,9 @@ class MovieService:
     def __init__(self, tmdb_client):
         self.tmdb = tmdb_client
 
+    def get_movie_details(self, tmdb_id):
+        return self.tmdb.get_movie_details(tmdb_id)
+
     def get_movies(self, category, page=1):
         if page < 1:
             raise ValueError("Page must be greater than zero.")

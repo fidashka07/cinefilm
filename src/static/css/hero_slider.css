@@ -23,12 +23,16 @@
     pointer-events: none;
 }
 
-.featured-label,
-.featured-info,
+#hero-image > .featured-label,
+#hero-image > .featured-info {
+    position: absolute;
+    z-index: 3;
+}
+
 .hero-slider-controls,
 .hero-slide-counter {
     position: relative;
-    z-index: 2;
+    z-index: 4;
 }
 
 .featured-info {
@@ -56,50 +60,57 @@
     transform: translateY(10px);
 }
 
+/* DOT NAVIGATION */
+
 .hero-slider-controls {
+    position: absolute;
+    z-index: 5;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 18px;
-    margin-top: 28px;
+    margin: 0;
 }
 
-.hero-slider-controls button {
-    width: 42px;
-    height: 42px;
-    border: 1px solid rgba(255,255,255,0.4);
-    background: rgba(16,15,18,0.5);
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    transition: 0.25s;
-}
-
-.hero-slider-controls button:hover {
-    background: var(--accent);
-    color: var(--bg);
-    border-color: var(--accent);
+#hero-prev,
+#hero-next {
+    display: none !important;
 }
 
 #hero-dots {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
 }
 
-.hero-dot {
-    width: 7px;
-    height: 7px;
-    border: none;
-    border-radius: 50%;
-    padding: 0;
-    background: rgba(255,255,255,0.4);
+#hero-dots .hero-dot {
+    display: block;
+    flex: 0 0 7px;
+    width: 7px !important;
+    min-width: 7px;
+    height: 7px !important;
+    min-height: 7px;
+    padding: 0 !important;
+    margin: 0;
+    border: none !important;
+    border-radius: 50% !important;
+    background: rgba(255,255,255,0.45) !important;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.hero-dot.active {
-    width: 24px;
-    border-radius: 10px;
-    background: var(--accent);
+#hero-dots .hero-dot:hover {
+    background: rgba(255,255,255,0.8) !important;
+}
+
+#hero-dots .hero-dot.active {
+    flex-basis: 25px;
+    width: 25px !important;
+    border-radius: 10px !important;
+    background: var(--accent) !important;
 }
 
 .hero-slide-counter {
@@ -112,10 +123,71 @@
 
 @media (max-width: 768px) {
     .hero-slider-controls {
-        gap: 10px;
+        bottom: 15px;
+    }
+
+    #hero-dots {
+        gap: 7px;
     }
 
     #hero-overview {
         font-size: 13px;
     }
+}
+
+/* Keep category and movie information on separate lines */
+
+#hero-image > .featured-label {
+    display: block;
+    position: relative;
+    width: fit-content;
+    margin-bottom: 22px;
+    clear: both;
+}
+
+#hero-image > .featured-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    clear: both;
+}
+
+#hero-image #hero-year,
+#hero-image #hero-title,
+#hero-image #hero-rating,
+#hero-image #hero-overview {
+    display: block;
+    width: fit-content;
+}
+
+/* HERO CONTENT POSITIONING */
+
+#hero-image > .featured-info {
+    position: absolute;
+    top: 45px;
+    bottom: auto;
+    left: 48px;
+    right: auto;
+    text-align: left;
+    align-items: flex-start;
+}
+
+#hero-image > .featured-label {
+    position: absolute;
+    top: auto;
+    bottom: 35px;
+    left: auto;
+    right: 48px;
+    text-align: right;
+    margin: 0;
+}
+
+#hero-image > .hero-slide-counter {
+    position: absolute;
+    left: 48px;
+    bottom: 25px;
+    top: auto;
+    margin: 0;
+    z-index: 5;
 }

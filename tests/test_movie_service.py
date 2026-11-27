@@ -1,0 +1,162 @@
+from unittest.mock import Mock
+
+import pytest
+
+from src.extensions import db
+from src.models import Genre, Movie
+from src.services.movie_service import MovieService
+
+
+class FakeTMDBClient:
+    def get_movies(self, category, page):
+        return {
+            "page": page,
+            "total_pages": 5,
+            "total_results": 2,
+            "results": [
+                {
+                    "id": 550,
+                    "title": "Fight Club",
+                    "release_date": "1999-10-15",
+                    "genre_ids": [18],
+                    "popularity": 100,
+                },
+                {
+                    "id": 551,
+                    "title": "Another Movie",
+                    "release_date": "2000-01-01",
+                    "genre_ids": [18],
+                    "popularity": 80,
+                },
+            ],
+        }
+
+    def get_movie_genres(self):
+        return [
+            {"id": 18, "name": "Drama"},
+        ]
+
+
+def test_get_movies_returns_movies_and_pagination(app):
+    with app.app_context():
+        service = MovieService(FakeTMDBClient())
+
+        result = service.get_movies("popular", page=2)
+
+        assert len(result["movies"]) == 2
+        assert result["page"] == 2
+        assert result["total_pages"] == 5
+        assert result["total_results"] == 2
+
+        assert result["movies"][0].title == "Fight Club"
+        assert result["movies"][1].title == "Another Movie"
+
+
+def test_get_movies_saves_movies_to_database(app):
+    with app.app_context():
+        service = MovieService(FakeTMDBClient())
+
+        service.get_movies("popular")
+
+        saved_movies = db.session.execute(
+            db.select(Movie)
+        ).scalars().all()
+
+        assert len(saved_movies) == 2
+        assert Movie.query.filter_by(tmdb_id=550).first() is not None
+
+
+def test_get_movies_creates_genres(app):
+    with app.app_context():
+        service = MovieService(FakeTMDBClient())
+
+        service.get_movies("popular")
+
+        genre = Genre.query.filter_by(tmdb_id=18).first()
+
+        assert genre is not None
+        assert genre.name == "Drama"
+
+
+def test_get_movies_rejects_invalid_page(app):
+    with app.app_context():
+        client = Mock()
+        service = MovieService(client)
+
+        with pytest.raises(
+            ValueError,
+            match="Page must be greater than zero.",
+        ):
+            service.get_movies("popular", page=0)
+
+        client.get_movies.assert_not_called()
+
+
+def test_get_movies_rolls_back_when_genre_retrieval_fails(
+    app,
+    monkeypatch,
+):
+    with app.app_context():
+        client = Mock()
+        client.get_movies.return_value = {"results": []}
+        client.get_movie_genres.side_effect = RuntimeError(
+            "TMDB unavailable"
+        )
+
+        rollback = Mock()
+        monkeypatch.setattr(
+            "src.services.movie_service.MovieRepository.rollback",
+            rollback,
+        )
+
+        service = MovieService(client)
+
+        with pytest.raises(RuntimeError, match="TMDB unavailable"):
+            service.get_movies("popular")
+
+        rollback.assert_called_once()
+
+
+def test_get_movies_rolls_back_when_saving_fails(
+    app,
+    monkeypatch,
+):
+    with app.app_context():
+        client = FakeTMDBClient()
+
+        rollback = Mock()
+        monkeypatch.setattr(
+            "src.services.movie_service.MovieRepository.rollback",
+            rollback,
+        )
+
+        monkeypatch.setattr(
+            "src.services.movie_service.MovieRepository.save_movie",
+            Mock(side_effect=RuntimeError("Database error")),
+        )
+
+        service = MovieService(client)
+
+        with pytest.raises(RuntimeError, match="Database error"):
+            service.get_movies("popular")
+
+        rollback.assert_called_once()
+
+
+def test_get_movies_handles_empty_results(app):
+    with app.app_context():
+        client = Mock()
+        client.get_movies.return_value = {
+            "page": 1,
+            "total_pages": 1,
+            "total_results": 0,
+            "results": [],
+        }
+        client.get_movie_genres.return_value = []
+
+        service = MovieService(client)
+
+        result = service.get_movies("popular")
+
+        assert result["movies"] == []
+        assert result["total_results"] == 0

@@ -1,11 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+
+/* ========================================
+   DESIGN SYSTEM
+======================================== */
+
 :root {
-    --bg: #101116;
-    --surface: #191a22;
-    --card: #22232d;
+    --bg: #100f12;
+    --surface: #19171c;
+    --card: #211e24;
     --accent: #e8a45b;
+    --accent-light: #f4c18d;
     --purple: #b6a0e8;
+    --burgundy: #642b43;
+
     --text: #f5f1ea;
-    --muted: #a5a4b0;
+    --muted: #a5a1aa;
+
+    --film: #09090b;
+    --border: rgba(255,255,255,.09);
 }
 
 * {
@@ -16,42 +29,70 @@
 
 html {
     scroll-behavior: smooth;
+    background: var(--bg);
 }
 
 body {
-    background: var(--bg);
+    min-height: 100vh;
+    background:
+        radial-gradient(ellipse at 10% 10%, rgba(100,43,67,.18), transparent 35%),
+        radial-gradient(ellipse at 90% 55%, rgba(232,164,91,.06), transparent 35%),
+        var(--bg);
+
     color: var(--text);
-    font-family: 'Inter', sans-serif;
+    font-family: 'DM Sans', sans-serif;
+}
+
+body.modal-open {
+    overflow: hidden;
 }
 
 a {
-    text-decoration: none;
     color: inherit;
+    text-decoration: none;
 }
+
+button {
+    font: inherit;
+}
+
+
+/* ========================================
+   NAVIGATION
+======================================== */
 
 .navbar {
     height: 86px;
     padding: 0 7%;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid rgba(255,255,255,.07);
+
+    border-bottom: 1px solid var(--border);
+    background: rgba(16,15,18,.82);
+
+    backdrop-filter: blur(18px);
+
+    position: relative;
+    z-index: 20;
 }
 
 .logo {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 25px;
-    font-weight: 800;
-    letter-spacing: -1.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(175px, 18vw, 245px);
+    height: 72px;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
-.logo span {
-    color: var(--accent);
-}
-
-.logo i {
-    color: var(--purple);
-    font-style: normal;
+.logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .nav-links {
@@ -79,26 +120,39 @@ a {
 
 .signup-btn,
 .primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
     background: var(--accent);
-    color: #17151a;
+    color: #171318;
+
     padding: 13px 21px;
-    border-radius: 7px;
+    border-radius: 5px;
+
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
+
     transition: .25s;
 }
 
 .signup-btn:hover,
 .primary-btn:hover {
-    background: #f4bd83;
+    background: var(--accent-light);
     transform: translateY(-2px);
 }
 
+
+/* ========================================
+   HERO
+======================================== */
+
 .hero {
-    min-height: 580px;
-    padding: 85px 7%;
+    min-height: 620px;
+    padding: 90px 7%;
+
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1.05fr;
     align-items: center;
     gap: 65px;
 }
@@ -112,9 +166,9 @@ a {
 
 .hero h1 {
     font-family: 'DM Serif Display', serif;
-    font-size: clamp(55px, 6vw, 82px);
-    line-height: 1.08;
-    margin: 24px 0;
+    font-size: clamp(55px, 6vw, 86px);
+    line-height: 1.06;
+    margin: 25px 0;
     letter-spacing: -2px;
 }
 
@@ -141,60 +195,87 @@ a {
 .secondary-btn {
     padding: 13px 20px;
     border: 1px solid #45434c;
-    border-radius: 7px;
+    border-radius: 5px;
     font-size: 13px;
     transition: .2s;
 }
 
 .secondary-btn:hover {
     border-color: var(--accent);
+    color: var(--accent);
 }
 
 .hero-meta {
     display: flex;
     gap: 25px;
     margin-top: 55px;
+
     color: var(--muted);
     font-size: 9px;
     letter-spacing: 1.5px;
 }
 
 .hero-image {
-    min-height: 390px;
-    border-radius: 15px;
+    min-height: 440px;
+    border-radius: 5px;
+
     position: relative;
     overflow: hidden;
+
     background:
-        linear-gradient(0deg, rgba(10,10,15,.95), transparent 70%),
+        linear-gradient(0deg, rgba(10,10,15,.95), transparent 75%),
         linear-gradient(135deg, #37313e, #171821);
+
     background-size: cover;
     background-position: center;
-    box-shadow: 0 25px 80px rgba(0,0,0,.4);
-    transition: background-image .3s;
+
+    box-shadow: 0 30px 90px rgba(0,0,0,.5);
+
+    transition: background-image .4s;
+}
+
+.hero-image::before {
+    content: "";
+    position: absolute;
+    inset: 15px;
+
+    border: 1px solid rgba(255,255,255,.13);
+
+    pointer-events: none;
 }
 
 .featured-label {
     position: absolute;
-    top: 25px;
-    left: 25px;
-    padding: 9px 13px;
-    background: rgba(16,17,22,.8);
-    border: 1px solid rgba(255,255,255,.15);
-    border-radius: 5px;
+    top: auto;
+    left: 48px;
+    bottom: 230px;
+    width: fit-content;
+    padding: 9px 14px;
+    background: rgba(16,17,22,.75);
+    border: 1px solid rgba(255,255,255,.2);
     font-size: 9px;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
+    z-index: 3;
 }
 
 .featured-info {
     position: absolute;
-    bottom: 30px;
-    left: 30px;
+    left: 48px;
+    bottom: 65px;
+    right: 40px;
+    max-width: 540px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    z-index: 3;
 }
 
 .featured-info h2 {
     font-family: 'DM Serif Display', serif;
-    font-size: 36px;
-    margin: 10px 0;
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1.15;
+    margin: 0;
 }
 
 .featured-info span {
@@ -202,9 +283,18 @@ a {
     color: var(--accent);
 }
 
+
+/* ========================================
+   SEARCH
+======================================== */
+
 .search-section {
-    padding: 70px 7%;
-    background: var(--surface);
+    padding: 65px 7%;
+
+    background: rgba(255,255,255,.025);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -221,16 +311,27 @@ a {
 .search-box {
     display: flex;
     align-items: center;
+
     background: var(--card);
-    padding: 16px 20px;
-    border-radius: 8px;
-    width: 380px;
+    padding: 17px 20px;
+
+    border: 1px solid var(--border);
+    border-radius: 5px;
+
+    width: 390px;
     gap: 12px;
+
+    transition: .25s;
+}
+
+.search-box:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 25px rgba(232,164,91,.08);
 }
 
 .search-box span {
     color: var(--accent);
-    font-size: 24px;
+    font-size: 25px;
 }
 
 .search-box input {
@@ -238,70 +339,292 @@ a {
     background: none;
     border: none;
     outline: none;
+
     color: var(--text);
     font-family: inherit;
     font-size: 12px;
 }
 
+
+/* ========================================
+   MOVIE SECTIONS
+======================================== */
+
 .movie-section {
-    padding: 85px 7%;
+    padding: 85px 0 60px;
+    overflow: hidden;
 }
 
 .section-heading {
+    padding: 0 7%;
+
     display: flex;
     justify-content: space-between;
     align-items: end;
+
     margin-bottom: 35px;
 }
 
 .section-number {
     color: var(--muted);
-    font-size: 10px;
-    letter-spacing: 1.5px;
+    font-size: 9px;
+    letter-spacing: 2px;
 }
 
-.movie-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 25px;
+.reel-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
+
+.reel-arrow {
+    width: 39px;
+    height: 39px;
+
+    border: 1px solid rgba(255,255,255,.15);
+    background: transparent;
+
+    color: var(--text);
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+.reel-arrow:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #171318;
+}
+
+
+/* ========================================
+   CINEFILM REEL
+======================================== */
+
+.reel-shell {
+    position: relative;
+
+    margin: 0;
+    padding: 36px 0 42px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #080809 0%,
+            #151216 50%,
+            #080809 100%
+        );
+
+    border-top: 1px solid rgba(232,164,91,.18);
+    border-bottom: 1px solid rgba(232,164,91,.18);
+}
+
+
+/* Filmstrip perforations */
+
+.reel-shell::before,
+.reel-shell::after {
+    content: "";
+
+    position: absolute;
+    left: 0;
+    right: 0;
+
+    height: 13px;
+
+    background:
+        repeating-linear-gradient(
+            90deg,
+            transparent 0,
+            transparent 7px,
+            #09090b 7px,
+            #09090b 13px,
+            transparent 13px,
+            transparent 24px
+        );
+
+    pointer-events: none;
+    z-index: 3;
+}
+
+.reel-shell::before {
+    top: 8px;
+}
+
+.reel-shell::after {
+    bottom: 8px;
+}
+
+
+/* Labels on the film */
+
+.reel-top-label,
+.reel-bottom-label {
+    position: absolute;
+    left: 7%;
+    right: 7%;
+
+    display: flex;
+    justify-content: space-between;
+
+    color: rgba(232,164,91,.55);
+
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 2px;
+
+    pointer-events: none;
+    z-index: 4;
+}
+
+.reel-top-label {
+    top: 10px;
+}
+
+.reel-bottom-label {
+    bottom: 11px;
+}
+
+
+/* Horizontal track */
+
+.film-track {
+    display: flex;
+    align-items: stretch;
+
+    gap: 0;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    padding: 10px 7% 18px;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+
+    cursor: grab;
+    user-select: none;
+}
+
+.film-track::-webkit-scrollbar {
+    display: none;
+}
+
+.film-track.is-dragging {
+    cursor: grabbing;
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+}
+
+
+/* Individual frames */
 
 .movie-card {
+    flex: 0 0 205px;
     min-width: 0;
-    transition: transform .3s;
+
+    position: relative;
+
+    padding: 12px 13px 15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #29242a,
+            #151317
+        );
+
+    border-right: 1px solid rgba(255,255,255,.07);
+    border-left: 1px solid rgba(255,255,255,.07);
+
+    scroll-snap-align: center;
+
+    cursor: pointer;
+
+    transition:
+        transform .35s ease,
+        background .35s ease,
+        box-shadow .35s ease;
 }
 
 .movie-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-9px);
+    background: #33272a;
+
+    box-shadow:
+        0 15px 35px rgba(0,0,0,.45),
+        0 0 20px rgba(232,164,91,.08);
+
+    z-index: 2;
 }
+
+.movie-card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.frame-number {
+    color: rgba(232,164,91,.55);
+
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 8px;
+    letter-spacing: 2px;
+
+    margin-bottom: 10px;
+}
+
+
+/* Poster */
 
 .poster-wrapper {
     position: relative;
+
     aspect-ratio: 2 / 3;
+
     overflow: hidden;
-    border-radius: 9px;
-    background: var(--card);
+
+    background: #28232a;
+    border-radius: 2px;
 }
 
 .poster-wrapper img {
     width: 100%;
     height: 100%;
+
+    display: block;
     object-fit: cover;
-    transition: transform .4s;
+
+    transition: transform .6s ease;
 }
 
-.movie-card:hover img {
-    transform: scale(1.06);
+.movie-card:hover .poster-wrapper img {
+    transform: scale(1.08);
 }
 
 .poster-overlay {
     position: absolute;
-    bottom: 0;
-    width: 100%;
-    padding: 30px 12px 12px;
-    background: linear-gradient(transparent, rgba(0,0,0,.85));
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    padding: 15px 12px;
+
+    background:
+        linear-gradient(
+            0deg,
+            rgba(0,0,0,.9),
+            transparent 50%,
+            rgba(0,0,0,.15)
+        );
+
     opacity: 0;
-    transition: .3s;
+    transition: opacity .3s;
 }
 
 .movie-card:hover .poster-overlay {
@@ -311,23 +634,35 @@ a {
 .poster-overlay span {
     font-size: 12px;
     color: var(--accent);
+    font-weight: 700;
+}
+
+.poster-overlay .view-film {
+    font-size: 9px;
+    letter-spacing: 1.5px;
 }
 
 .poster-placeholder {
     height: 100%;
+
     display: grid;
     place-items: center;
+
     color: var(--muted);
-    font-size: 11px;
+    font-size: 10px;
 }
 
+
+/* Movie metadata */
+
 .movie-info {
-    padding-top: 14px;
+    padding-top: 13px;
 }
 
 .movie-info h3 {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 700;
+
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -336,8 +671,10 @@ a {
 .movie-meta {
     display: flex;
     justify-content: space-between;
+
     margin-top: 9px;
-    font-size: 11px;
+
+    font-size: 10px;
     color: var(--muted);
 }
 
@@ -345,20 +682,208 @@ a {
     color: var(--accent);
 }
 
+.reel-hint {
+    padding: 17px 7% 0;
+
+    color: #77717b;
+    font-size: 8px;
+    letter-spacing: 2px;
+}
+
+.reel-hint span {
+    color: var(--accent);
+    padding: 0 5px;
+}
+
 .loading,
 .error-message {
     color: var(--muted);
     font-size: 13px;
-    padding: 20px 0;
+    padding: 20px;
 }
 
-.community-banner {
-    margin: 50px 7% 100px;
-    padding: 65px;
-    border-radius: 15px;
+
+/* ========================================
+   MOVIE DETAILS MODAL
+======================================== */
+
+.movie-modal {
+    position: fixed;
+    inset: 0;
+
+    z-index: 100;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 25px;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition: .3s;
+}
+
+.movie-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+
+    background: rgba(0,0,0,.86);
+    backdrop-filter: blur(12px);
+}
+
+.modal-content {
+    position: relative;
+    z-index: 2;
+
+    width: min(850px, 100%);
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: #171419;
+    border: 1px solid rgba(232,164,91,.2);
+
+    transform: translateY(25px);
+    transition: transform .3s;
+}
+
+.movie-modal.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 18px;
+
+    z-index: 5;
+
+    width: 40px;
+    height: 40px;
+
+    border: 1px solid rgba(255,255,255,.25);
+    background: rgba(0,0,0,.55);
+
+    color: white;
+    font-size: 26px;
+
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    background: var(--accent);
+    color: #171318;
+}
+
+.modal-hero {
+    min-height: 340px;
+
+    position: relative;
+
+    background-size: cover;
+    background-position: center 35%;
+
+    background-color: #28232a;
+}
+
+.modal-hero-overlay {
+    position: absolute;
+    inset: 0;
+
     background:
-        radial-gradient(circle at 90% 10%, rgba(182,160,232,.16), transparent 35%),
-        linear-gradient(120deg, #25212c, #191a22);
+        linear-gradient(
+            0deg,
+            #171419,
+            rgba(23,20,25,.1) 100%
+        );
+}
+
+.modal-title {
+    position: absolute;
+    bottom: 30px;
+    left: 35px;
+    right: 35px;
+}
+
+.modal-title h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 45px;
+    margin: 12px 0;
+}
+
+.modal-title p {
+    color: var(--accent);
+    font-size: 13px;
+}
+
+.modal-details {
+    display: grid;
+    grid-template-columns: 170px 1fr;
+    gap: 30px;
+
+    padding: 15px 35px 40px;
+}
+
+.modal-poster {
+    width: 100%;
+    border-radius: 3px;
+}
+
+.modal-description > p {
+    color: var(--muted);
+    line-height: 1.8;
+    font-size: 13px;
+    margin: 15px 0 25px;
+}
+
+.detail-row {
+    margin-top: 20px;
+}
+
+.detail-row > span {
+    color: var(--accent);
+    font-size: 9px;
+    letter-spacing: 2px;
+    font-weight: 800;
+}
+
+.detail-row p {
+    color: var(--text);
+    font-size: 12px;
+    margin-top: 8px;
+    line-height: 1.7;
+}
+
+.trailer-btn {
+    margin-top: 25px;
+}
+
+
+/* ========================================
+   COMMUNITY
+======================================== */
+
+.community-banner {
+    margin: 70px 7% 100px;
+    padding: 75px;
+
+    border: 1px solid rgba(232,164,91,.15);
+
+    background:
+        radial-gradient(
+            circle at 90% 10%,
+            rgba(182,160,232,.16),
+            transparent 35%
+        ),
+        linear-gradient(120deg, #292129, #19171c);
+
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -372,9 +897,14 @@ a {
     margin-top: 20px;
 }
 
+
+/* ========================================
+   FOOTER
+======================================== */
+
 footer {
     padding: 50px 7%;
-    border-top: 1px solid rgba(255,255,255,.07);
+    border-top: 1px solid var(--border);
     text-align: center;
 }
 
@@ -399,25 +929,33 @@ footer small {
     font-size: 10px;
 }
 
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
 @media (max-width: 1000px) {
+
     .hero {
         grid-template-columns: 1fr;
     }
 
     .hero-image {
-        min-height: 350px;
+        min-height: 380px;
     }
 
-    .movie-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+    .movie-card {
+        flex-basis: 190px;
     }
 
-    .nav-links {
-        gap: 15px;
+    .community-banner {
+        padding: 45px;
     }
+
 }
 
 @media (max-width: 650px) {
+
     .navbar {
         height: auto;
         padding: 22px 5%;
@@ -438,14 +976,19 @@ footer small {
 
     .hero {
         padding: 65px 6%;
+        gap: 40px;
     }
 
     .hero-actions {
         flex-wrap: wrap;
     }
 
+    .hero-meta {
+        flex-wrap: wrap;
+    }
+
     .search-section {
-        padding: 50px 6%;
+        padding: 45px 6%;
         flex-direction: column;
         align-items: stretch;
     }
@@ -454,22 +997,57 @@ footer small {
         width: 100%;
     }
 
-    .movie-section {
-        padding: 60px 6%;
+    .section-heading {
+        padding: 0 6%;
+        align-items: center;
     }
 
-    .movie-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
+    .section-heading h2 {
+        font-size: 30px;
     }
 
     .section-number {
         display: none;
     }
 
+    .reel-controls {
+        gap: 6px;
+    }
+
+    .reel-arrow {
+        width: 34px;
+        height: 34px;
+    }
+
+    .movie-section {
+        padding: 60px 0 40px;
+    }
+
+    .movie-card {
+        flex-basis: 165px;
+    }
+
+    .film-track {
+        padding-left: 6%;
+        padding-right: 6%;
+    }
+
+    .reel-top-label,
+    .reel-bottom-label {
+        left: 6%;
+        right: 6%;
+        font-size: 7px;
+    }
+
+    .reel-hint {
+        padding-left: 6%;
+        font-size: 7px;
+    }
+
     .community-banner {
-        margin: 30px 6% 60px;
+        margin: 40px 6% 60px;
         padding: 35px 25px;
+
         flex-direction: column;
         align-items: flex-start;
     }
@@ -477,121 +1055,995 @@ footer small {
     .community-banner h2 {
         font-size: 32px;
     }
-}
 
-/* =========================================
-   CINEFILM — CINEMATIC ATMOSPHERE
-========================================= */
-
-:root {
-    --bg-primary: #101014;
-    --bg-secondary: #17151b;
-    --accent-amber: #e8a45b;
-    --accent-burgundy: #642b43;
-    --text-primary: #f5f1ea;
-}
-
-/* Main background */
-
-html {
-    scroll-behavior: smooth;
-    background: var(--bg-primary);
-}
-
-body {
-    position: relative;
-    isolation: isolate;
-    min-height: 100vh;
-    background:
-        radial-gradient(
-            ellipse at 12% 8%,
-            rgba(100, 43, 67, 0.19),
-            transparent 38%
-        ),
-        radial-gradient(
-            ellipse at 88% 35%,
-            rgba(232, 164, 91, 0.07),
-            transparent 32%
-        ),
-        radial-gradient(
-            ellipse at 50% 95%,
-            rgba(91, 45, 69, 0.12),
-            transparent 45%
-        ),
-        #101014;
-    color: var(--text-primary);
-}
-
-/* Atmospheric lighting */
-
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-
-    background:
-        radial-gradient(
-            circle at 0% 40%,
-            rgba(128, 45, 76, 0.10),
-            transparent 28%
-        ),
-        radial-gradient(
-            circle at 100% 80%,
-            rgba(232, 164, 91, 0.06),
-            transparent 25%
-        );
-
-    animation: atmosphere 18s ease-in-out infinite alternate;
-}
-
-/* Subtle analog film texture */
-
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 10;
-    pointer-events: none;
-    opacity: 0.12;
-
-    background-image:
-        repeating-radial-gradient(
-            circle at 0 0,
-            transparent 0,
-            rgba(255, 255, 255, 0.12) 1px,
-            transparent 2px,
-            transparent 4px
-        );
-
-    background-size: 7px 7px;
-    mix-blend-mode: soft-light;
-}
-
-/* Ambient movement */
-
-@keyframes atmosphere {
-    0% {
-        opacity: 0.65;
-        transform: scale(1);
+    .modal-details {
+        grid-template-columns: 100px 1fr;
+        gap: 18px;
+        padding: 15px 20px 30px;
     }
 
-    100% {
-        opacity: 1;
-        transform: scale(1.08);
+    .modal-hero {
+        min-height: 260px;
     }
-}
 
-/* Respect accessibility preferences */
+    .modal-title {
+        left: 20px;
+        bottom: 20px;
+    }
+
+    .modal-title h2 {
+        font-size: 32px;
+    }
+
+}
 
 @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {
         scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+
+}
+
+/* ==========================================
+   CINEFILM — FULL-SIZE CINEMATIC FILMSTRIP
+========================================== */
+
+.reel-shell {
+    position: relative;
+    width: 100%;
+    margin: 35px 0 65px;
+    overflow: hidden;
+}
+
+/* The actual film reel */
+.film-track {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    padding: 42px 30px;
+
+    background-color: #242229;
+
+    background-image:
+        radial-gradient(
+            circle,
+            #0b0b0e 0 6px,
+            transparent 6.5px
+        ),
+        radial-gradient(
+            circle,
+            #0b0b0e 0 6px,
+            transparent 6.5px
+        );
+
+    background-size: 36px 20px, 36px 20px;
+    background-position: 12px 8px, 12px calc(100% - 8px);
+    background-repeat: repeat-x;
+
+    border-top: 2px solid #45414a;
+    border-bottom: 2px solid #45414a;
+
+    scrollbar-width: thin;
+    scrollbar-color: #d99a58 #242229;
+
+    cursor: grab;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+}
+
+.film-track:active {
+    cursor: grabbing;
+}
+
+/* Individual frames inside the filmstrip */
+.movie-card {
+    position: relative;
+    flex: 0 0 270px;
+    width: 270px;
+    min-width: 270px;
+
+    padding: 9px;
+    margin: 0;
+
+    background: #111115;
+    border-left: 1px solid #45414a;
+    border-right: 1px solid #45414a;
+
+    overflow: hidden;
+    scroll-snap-align: center;
+
+    transition:
+        transform 0.3s ease,
+        background 0.3s ease;
+}
+
+.movie-card:hover {
+    background: #343039;
+    transform: translateY(-5px);
+    z-index: 2;
+}
+
+/* Large movie posters */
+.movie-card img {
+    display: block;
+    width: 100%;
+    height: 365px;
+
+    object-fit: cover;
+    object-position: center;
+
+    border-radius: 2px;
+
+    transition:
+        transform 0.4s ease,
+        filter 0.4s ease;
+}
+
+.movie-card:hover img {
+    filter: brightness(1.08);
+}
+
+/* Movie information */
+.movie-card h3,
+.movie-card .movie-title {
+    margin-top: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #f5f1ea;
+}
+
+.movie-card p,
+.movie-card .movie-meta {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #aaa5ad;
+}
+
+/* Reel navigation */
+.reel-shell button {
+    z-index: 5;
+}
+
+/* Hide unnecessary scrollbar on WebKit */
+.film-track::-webkit-scrollbar {
+    height: 7px;
+}
+
+.film-track::-webkit-scrollbar-track {
+    background: #242229;
+}
+
+.film-track::-webkit-scrollbar-thumb {
+    background: #b9824d;
+    border-radius: 10px;
+}
+
+.film-track::-webkit-scrollbar-thumb:hover {
+    background: #e8a45b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .film-track {
+        padding: 32px 18px;
+    }
+
+    .movie-card {
+        flex: 0 0 220px;
+        width: 220px;
+        min-width: 220px;
+    }
+
+    .movie-card img {
+        height: 310px;
+    }
+}
+
+/* ==========================================
+   CINEFILM — GLOBAL SIZE & READABILITY PASS
+========================================== */
+
+html {
+    font-size: 17px;
+}
+
+body {
+    font-size: 16px;
+    line-height: 1.65;
+}
+
+/* Main layout */
+.container,
+main,
+.page-content {
+    max-width: 1600px;
+}
+
+/* Navigation */
+.navbar,
+header {
+    min-height: 82px;
+}
+
+.navbar a,
+.nav-links a,
+header nav a {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.logo,
+.navbar-brand {
+    font-size: 27px;
+    font-weight: 800;
+}
+
+/* Section headings */
+section h2,
+.section-title,
+.reel-heading {
+    font-size: 32px;
+    line-height: 1.25;
+    font-weight: 800;
+    margin-bottom: 24px;
+}
+
+section h3 {
+    font-size: 22px;
+}
+
+/* General text */
+p {
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+small,
+.text-muted {
+    font-size: 14px;
+}
+
+/* Buttons */
+button,
+.btn,
+input[type="submit"] {
+    min-height: 46px;
+    padding: 11px 21px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+/* Inputs */
+input,
+select,
+textarea {
+    min-height: 46px;
+    padding: 12px 15px;
+    font-size: 16px;
+}
+
+input::placeholder,
+textarea::placeholder {
+    font-size: 15px;
+}
+
+/* Filmstrip */
+.reel-shell {
+    margin: 45px 0 75px;
+}
+
+.film-track {
+    padding: 48px 35px;
+}
+
+.movie-card {
+    flex: 0 0 310px;
+    width: 310px;
+    min-width: 310px;
+    padding: 12px;
+}
+
+.movie-card img {
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+}
+
+.movie-card h3,
+.movie-card .movie-title {
+    font-size: 18px;
+    margin-top: 14px;
+}
+
+.movie-card p,
+.movie-card .movie-meta {
+    font-size: 14px;
+}
+
+/* Reel navigation buttons */
+.reel-shell button {
+    min-width: 46px;
+    min-height: 46px;
+    font-size: 20px;
+}
+
+/* Movie details modal */
+.modal-content {
+    font-size: 16px;
+}
+
+.modal-content h2 {
+    font-size: 30px;
+}
+
+.modal-content h3 {
+    font-size: 21px;
+}
+
+.modal-content p {
+    font-size: 16px;
+}
+
+/* Cards and general interactive elements */
+.card {
+    padding: 22px;
+}
+
+.card h3 {
+    font-size: 20px;
+}
+
+.card p {
+    font-size: 15px;
+}
+
+/* Search */
+.search-input,
+.search-container input {
+    min-height: 52px;
+    font-size: 17px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+
+    section h2,
+    .section-title,
+    .reel-heading {
+        font-size: 26px;
+    }
+
+    .movie-card {
+        flex: 0 0 260px;
+        width: 260px;
+        min-width: 260px;
+    }
+
+    .movie-card img {
+        height: 350px;
+    }
+}
+
+/* ==========================================
+   CINEFILM — LAYOUT AND SCALE FIX
+========================================== */
+
+/* USE THE ENTIRE BROWSER WIDTH */
+html,
+body {
+    width: 100%;
+    min-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+main,
+#app,
+.app,
+.page-content,
+.container {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* FULL-WIDTH SECTIONS */
+.navbar,
+.hero,
+.search-section,
+.movie-section,
+.community-banner,
+footer {
+    width: 100%;
+    max-width: none;
+}
+
+/* BIGGER NAVIGATION */
+.navbar {
+    min-height: 100px;
+    padding: 0 6%;
+}
+
+.logo {
+    font-size: 34px;
+}
+
+.nav-links {
+    gap: 42px;
+}
+
+.nav-links a,
+.login-link {
+    font-size: 17px;
+}
+
+.signup-btn {
+    padding: 17px 28px;
+    font-size: 16px;
+}
+
+/* BIGGER HERO */
+.hero {
+    min-height: 700px;
+    padding: 90px 6%;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 65px;
+}
+
+.hero h1 {
+    font-size: clamp(65px, 5.5vw, 100px);
+}
+
+.hero-content > p {
+    font-size: 18px;
+}
+
+.primary-btn,
+.secondary-btn {
+    padding: 18px 28px;
+    font-size: 16px;
+}
+
+.hero-image {
+    min-height: 540px;
+}
+
+/* SEARCH */
+.search-section {
+    padding: 75px 6%;
+}
+
+.search-section h2 {
+    font-size: 46px;
+}
+
+.search-box {
+    width: 480px;
+    min-height: 72px;
+    padding: 20px 25px;
+}
+
+.search-box input {
+    font-size: 16px;
+}
+
+/* SECTION HEADINGS */
+.section-heading {
+    padding: 0 6%;
+    margin-bottom: 45px;
+}
+
+.section-heading h2 {
+    font-size: 46px;
+}
+
+.eyebrow {
+    font-size: 12px;
+}
+
+.section-number {
+    font-size: 12px;
+}
+
+/* FILMSTRIP */
+.reel-shell {
+    width: 100%;
+    margin: 0;
+    padding: 48px 0 55px;
+    overflow: hidden;
+}
+
+.film-track {
+    width: 100%;
+    padding: 20px 6% 25px;
+    gap: 0;
+    align-items: stretch;
+}
+
+/* LARGE FRAMES */
+.movie-card {
+    flex: 0 0 370px;
+    width: 370px;
+    min-width: 370px;
+    padding: 17px;
+    background: #19161b;
+}
+
+.frame-number {
+    font-size: 11px;
+    margin-bottom: 13px;
+}
+
+/* POSTERS INSIDE THE FILM FRAMES */
+.poster-wrapper {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+}
+
+.poster-wrapper img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.movie-info {
+    padding-top: 17px;
+}
+
+.movie-info h3 {
+    font-size: 18px;
+}
+
+.movie-meta {
+    font-size: 14px;
+    margin-top: 12px;
+}
+
+.poster-overlay span {
+    font-size: 16px;
+}
+
+/* BIGGER FILMSTRIP CONTROLS */
+.reel-arrow {
+    width: 55px;
+    height: 55px;
+    font-size: 22px;
+}
+
+.reel-controls {
+    gap: 15px;
+}
+
+/* MODAL */
+.modal-content {
+    width: min(1100px, 95%);
+}
+
+.modal-title h2 {
+    font-size: 55px;
+}
+
+.modal-description > p {
+    font-size: 17px;
+}
+
+.detail-row p {
+    font-size: 16px;
+}
+
+/* COMMUNITY */
+.community-banner {
+    padding: 90px 7%;
+}
+
+.community-banner h2 {
+    font-size: 52px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1000px) {
+    .hero {
+        grid-template-columns: 1fr;
+    }
+
+    .movie-card {
+        flex: 0 0 300px;
+        width: 300px;
+        min-width: 300px;
+    }
+}
+
+@media (max-width: 650px) {
+    .hero {
+        padding: 60px 6%;
+    }
+
+    .hero-image {
+        min-height: 350px;
+    }
+
+    .movie-card {
+        flex: 0 0 260px;
+        width: 260px;
+        min-width: 260px;
+    }
+
+    .section-heading h2 {
+        font-size: 32px;
+    }
+
+    .community-banner h2 {
+        font-size: 35px;
+    }
+}
+
+/* ==========================================
+   CINEFILM — CINEMATIC POPCORN LOADER
+========================================== */
+
+.popcorn-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            rgba(100, 43, 67, 0.28),
+            transparent 55%
+        ),
+        #100f12;
+
+    opacity: 1;
+    visibility: visible;
+
+    transition:
+        opacity 0.65s ease,
+        visibility 0.65s ease;
+}
+
+.popcorn-loader.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loader-brand {
+    color: #f5f1ea;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(35px, 5vw, 54px);
+    font-weight: 800;
+    letter-spacing: 0.17em;
+}
+
+.loader-caption,
+.loader-tagline {
+    color: #e8a45b;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+}
+
+.loader-caption {
+    margin-top: 12px;
+}
+
+.loader-tagline {
+    margin-top: 18px;
+}
+
+
+/* POPCORN SCENE */
+
+.popcorn-scene {
+    position: relative;
+    width: 250px;
+    height: 265px;
+    margin: 25px 0 10px;
+}
+
+.popcorn-bucket {
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+
+    width: 165px;
+    height: 185px;
+
+    transform: translateX(-50%);
+}
+
+
+/* BUCKET BODY */
+
+.bucket-body {
+    position: absolute;
+    z-index: 2;
+
+    left: 8px;
+    bottom: 0;
+
+    width: 149px;
+    height: 145px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: repeating-linear-gradient(
+        90deg,
+        #a52e43 0,
+        #a52e43 22px,
+        #c94a53 22px,
+        #c94a53 43px
+    );
+
+    clip-path: polygon(0 0, 100% 0, 87% 100%, 13% 100%);
+
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35);
+}
+
+.bucket-body span {
+    color: #fff0d8;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    transform: rotate(-3deg);
+}
+
+.bucket-rim {
+    position: absolute;
+    z-index: 5;
+
+    top: 24px;
+    left: 2px;
+
+    width: 161px;
+    height: 25px;
+
+    border: 5px solid #f3e4c8;
+    border-radius: 50%;
+
+    background: #a52e43;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.bucket-base {
+    position: absolute;
+    z-index: 1;
+
+    bottom: 0;
+    left: 29px;
+
+    width: 105px;
+    height: 12px;
+
+    border-radius: 50%;
+    background: #e9d7b9;
+}
+
+
+/* POPCORN INSIDE THE BUCKET */
+
+.bucket-popcorn {
+    position: absolute;
+    z-index: 4;
+
+    top: 0;
+    left: 19px;
+
+    width: 125px;
+    height: 75px;
+}
+
+.bucket-popcorn i {
+    position: absolute;
+
+    width: 25px;
+    height: 24px;
+
+    border-radius: 48% 52% 45% 55%;
+
+    background:
+        radial-gradient(
+            circle at 32% 25%,
+            #fffdf1 0,
+            #fff0c9 45%,
+            #e8cb91 100%
+        );
+
+    box-shadow: 2px 3px 0 #d8bd86;
+
+    opacity: 0;
+    transform: translateY(-45px) scale(0.4);
+
+    animation: popcorn-fill 0.65s ease-out forwards;
+}
+
+.bucket-popcorn i:nth-child(1)  { left: 5px; top: 38px; animation-delay: .15s; }
+.bucket-popcorn i:nth-child(2)  { left: 25px; top: 27px; animation-delay: .25s; }
+.bucket-popcorn i:nth-child(3)  { left: 45px; top: 35px; animation-delay: .35s; }
+.bucket-popcorn i:nth-child(4)  { left: 65px; top: 25px; animation-delay: .45s; }
+.bucket-popcorn i:nth-child(5)  { left: 85px; top: 37px; animation-delay: .55s; }
+.bucket-popcorn i:nth-child(6)  { left: 15px; top: 12px; animation-delay: .65s; }
+.bucket-popcorn i:nth-child(7)  { left: 39px; top: 7px; animation-delay: .75s; }
+.bucket-popcorn i:nth-child(8)  { left: 62px; top: 10px; animation-delay: .85s; }
+.bucket-popcorn i:nth-child(9)  { left: 80px; top: 14px; animation-delay: .95s; }
+.bucket-popcorn i:nth-child(10) { left: 0; top: 24px; animation-delay: 1.05s; }
+.bucket-popcorn i:nth-child(11) { left: 100px; top: 25px; animation-delay: 1.15s; }
+.bucket-popcorn i:nth-child(12) { left: 28px; top: 45px; animation-delay: 1.25s; }
+.bucket-popcorn i:nth-child(13) { left: 54px; top: 44px; animation-delay: 1.35s; }
+.bucket-popcorn i:nth-child(14) { left: 76px; top: 47px; animation-delay: 1.45s; }
+
+@keyframes popcorn-fill {
+    0% {
+        opacity: 0;
+        transform: translateY(-45px) scale(0.4) rotate(-30deg);
+    }
+
+    65% {
+        opacity: 1;
+        transform: translateY(4px) scale(1.1) rotate(8deg);
+    }
+
+    85% {
+        transform: translateY(-3px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+/* FALLING POPCORN */
+
+.falling-popcorn {
+    position: absolute;
+    z-index: 6;
+
+    top: 12px;
+    left: 50%;
+
+    width: 180px;
+    height: 150px;
+
+    transform: translateX(-50%);
+}
+
+.falling-popcorn i {
+    position: absolute;
+
+    width: 19px;
+    height: 18px;
+
+    border-radius: 50% 45% 55% 40%;
+
+    background: radial-gradient(
+        circle at 30% 25%,
+        #fffdf1,
+        #f0dba9
+    );
+
+    opacity: 0;
+
+    animation: popcorn-fall 1.5s ease-in infinite;
+}
+
+.falling-popcorn i:nth-child(1) { left: 15px; animation-delay: .1s; }
+.falling-popcorn i:nth-child(2) { left: 55px; animation-delay: .5s; }
+.falling-popcorn i:nth-child(3) { left: 95px; animation-delay: .9s; }
+.falling-popcorn i:nth-child(4) { left: 130px; animation-delay: .3s; }
+.falling-popcorn i:nth-child(5) { left: 80px; animation-delay: 1.2s; }
+
+@keyframes popcorn-fall {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) rotate(0);
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    80% {
+        opacity: 1;
+        transform: translateY(110px) rotate(180deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(135px) rotate(260deg);
+    }
+}
+
+
+/* LOADING PROGRESS */
+
+.loader-progress {
+    width: 190px;
+    height: 3px;
+
+    margin-top: 12px;
+
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.loader-progress span {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    background: #e8a45b;
+
+    transform: scaleX(0);
+    transform-origin: left;
+
+    animation: loader-progress 1.8s ease forwards;
+}
+
+@keyframes loader-progress {
+    to {
+        transform: scaleX(1);
+    }
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 600px) {
+    .logo {
+        width: 145px;
+        height: 60px;
+    }
+
+    .popcorn-scene {
+        transform: scale(0.9);
+    }
+
+    .loader-brand {
+        font-size: 34px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .popcorn-loader *,
+    .popcorn-loader *::before,
+    .popcorn-loader *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
     }
 }
