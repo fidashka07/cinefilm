@@ -5,8 +5,9 @@ from unittest.mock import Mock
 import pytest
 
 from src.extensions import db
-from src.models import Genre, Movie
+from src.models import Genre, Movie, Notification, User, WatchlistEntry
 from src.services.tmdb_client import TMDBError
+from datetime import date, timedelta
 
 
 @pytest.fixture
@@ -267,3 +268,112 @@ def test_get_movie_details_handles_tmdb_error(client, monkeypatch):
 
     assert response.status_code == 502
     assert "temporarily unavailable" in response.get_json()["error"]
+    
+def create_watchlist_test_user():
+    user = User(
+        username="watchlisttester",
+        email="watchlisttester@example.com",
+    )
+    user.set_password("Password123")
+    db.session.add(user)
+    db.session.commit()
+    return user
+
+
+def login_test_user(client, user):
+    with client.session_transaction() as session:
+        session["_user_id"] = str(user.id)
+        session["_fresh"] = True
+
+
+def test_adding_upcoming_movie_creates_immediate_notification(
+    client, app, monkeypatch
+):
+    with app.app_context():
+        user = create_watchlist_test_user()
+        login_test_user(client, user)
+
+        movie = Movie(
+            tmdb_id=9001,
+            title="Upcoming Movie",
+            release_date=date.today() + timedelta(days=5),
+        )
+        db.session.add(movie)
+        db.session.commit()
+
+        monkeypatch.setattr(
+            "src.routes.movies.get_movie_service",
+            lambda: Mock(),
+        )
+
+        response = client.post("/movies/watchlist/9001")
+
+        assert response.status_code == 201
+
+        notification = Notification.query.one()
+        assert notification.user_id == user.id
+        assert notification.movie_id == movie.id
+        assert notification.notification_type == "added_to_watchlist"
+
+
+@pytest.mark.parametrize(
+    "release_date",
+    [
+        date.today() - timedelta(days=1),
+        None,
+    ],
+)
+def test_adding_released_or_unknown_date_movie_creates_no_notification(
+    client, app, monkeypatch, release_date
+):
+    with app.app_context():
+        user = create_watchlist_test_user()
+        login_test_user(client, user)
+
+        movie = Movie(
+            tmdb_id=9002,
+            title="Existing Movie",
+            release_date=release_date,
+        )
+        db.session.add(movie)
+        db.session.commit()
+
+        monkeypatch.setattr(
+            "src.routes.movies.get_movie_service",
+            lambda: Mock(),
+        )
+
+        response = client.post("/movies/watchlist/9002")
+
+        assert response.status_code == 201
+        assert Notification.query.count() == 0
+        assert WatchlistEntry.query.count() == 1
+
+
+def test_adding_same_movie_twice_does_not_create_duplicate_notification(
+    client, app, monkeypatch
+):
+    with app.app_context():
+        user = create_watchlist_test_user()
+        login_test_user(client, user)
+
+        movie = Movie(
+            tmdb_id=9003,
+            title="Duplicate Movie",
+            release_date=date.today() + timedelta(days=5),
+        )
+        db.session.add(movie)
+        db.session.commit()
+
+        monkeypatch.setattr(
+            "src.routes.movies.get_movie_service",
+            lambda: Mock(),
+        )
+
+        first_response = client.post("/movies/watchlist/9003")
+        second_response = client.post("/movies/watchlist/9003")
+
+        assert first_response.status_code == 201
+        assert second_response.status_code == 409
+        assert Notification.query.count() == 1
+        assert WatchlistEntry.query.count() == 1
