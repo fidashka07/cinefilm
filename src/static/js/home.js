@@ -47,15 +47,19 @@ async function loadMovies(category, elementId) {
 // RENDER FILMSTRIP
 // ========================================
 
-function renderMovies(movies, container) {
+function renderMovies(movies, container, append = false) {
     if (!movies.length) {
-        container.innerHTML = `
-            <p class="loading">No movies found.</p>
-        `;
+        if (!append) {
+            container.innerHTML = `
+                <p class="loading">No movies found.</p>
+            `;
+        }
         return;
     }
 
-    container.innerHTML = movies.map((movie, index) => {
+    const startIndex = append ? container.children.length : 0;
+
+    const cards = movies.map((movie, index) => {
         const poster = movie.poster_path
             ? `${IMAGE_BASE}w500${movie.poster_path}`
             : null;
@@ -74,13 +78,11 @@ function renderMovies(movies, container) {
                 role="button"
                 aria-label="View ${escapeHTML(movie.title)} details"
             >
-
                 <div class="frame-number">
-                    FRAME ${String(index + 1).padStart(3, "0")}
+                    FRAME ${String(startIndex + index + 1).padStart(3, "0")}
                 </div>
 
                 <div class="poster-wrapper">
-
                     ${
                         poster
                         ? `
@@ -91,9 +93,7 @@ function renderMovies(movies, container) {
                             >
                         `
                         : `
-                            <div class="poster-placeholder">
-                                NO POSTER
-                            </div>
+                            <div class="poster-placeholder">NO POSTER</div>
                         `
                     }
 
@@ -101,7 +101,6 @@ function renderMovies(movies, container) {
                         <span>★ ${rating}</span>
                         <span class="view-film">VIEW FILM ↗</span>
                     </div>
-
                 </div>
 
                 <div class="movie-info">
@@ -112,12 +111,21 @@ function renderMovies(movies, container) {
                         <span>★ ${rating}</span>
                     </div>
 
-                    <button class="watchlist-btn" data-watchlist-id="${movie.tmdb_id}" type="button">＋ Watchlist</button>
+                    <button
+                        class="watchlist-btn"
+                        data-watchlist-id="${movie.tmdb_id}"
+                        type="button"
+                    >＋ Watchlist</button>
                 </div>
-
             </article>
         `;
     }).join("");
+
+    if (append) {
+        container.insertAdjacentHTML("beforeend", cards);
+    } else {
+        container.innerHTML = cards;
+    }
 }
 
 
@@ -956,4 +964,98 @@ function getCSRFToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content
         || document.querySelector('input[name="csrf_token"]')?.value
         || "";
+}
+// ========================================
+// PERSONALIZED FOR YOU RECOMMENDATIONS
+// ========================================
+
+const forYouGrid = document.getElementById("for-you-grid");
+const forYouLoadMore = document.getElementById("for-you-load-more");
+
+let forYouPage = 1;
+let forYouTotalPages = 1;
+let forYouLoading = false;
+
+
+async function loadForYouMovies(page = 1) {
+    if (!forYouGrid || forYouLoading) return;
+
+    forYouLoading = true;
+
+    if (page === 1) {
+        forYouGrid.innerHTML = `
+            <p class="loading">Finding films you'll love...</p>
+        `;
+    }
+
+    if (forYouLoadMore) {
+        forYouLoadMore.disabled = true;
+    }
+
+    try {
+        const response = await fetch(`/movies/for-you?page=${page}`);
+
+        if (response.status === 401) {
+            window.location.href = "/auth/login";
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error("Unable to load personalized recommendations.");
+        }
+
+        const data = await response.json();
+
+        forYouPage = data.page;
+        forYouTotalPages = data.total_pages;
+
+        const movies = data.movies || [];
+
+        if (page === 1 && movies.length === 0) {
+            forYouGrid.innerHTML = `
+                <p class="loading">
+                    No recommendations available yet.
+                    Try adding favorite genres or rating some films!
+                </p>
+            `;
+        } else {
+            renderMovies(movies, forYouGrid, page > 1);
+        }
+
+        if (forYouLoadMore) {
+            forYouLoadMore.hidden =
+                movies.length === 0 || forYouPage >= forYouTotalPages;
+        }
+
+    } catch (error) {
+        if (page === 1) {
+            forYouGrid.innerHTML = `
+                <p class="error-message">
+                    Unable to load your recommendations. Please try again later.
+                </p>
+            `;
+        }
+
+        console.error("For You error:", error);
+
+    } finally {
+        forYouLoading = false;
+
+        if (forYouLoadMore) {
+            forYouLoadMore.disabled = false;
+        }
+    }
+}
+
+
+if (forYouGrid) {
+    loadForYouMovies();
+}
+
+if (forYouLoadMore) {
+    forYouLoadMore.addEventListener("click", () => {
+        if (forYouPage < forYouTotalPages) {
+            loadForYouMovies(forYouPage + 1);
+        }
+    });
 }

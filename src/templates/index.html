@@ -3,6 +3,7 @@
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/hero_slider.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/mood_recommendations.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/for_you.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -67,6 +68,29 @@
 
 </section>
 
+{% if current_user.is_authenticated %}
+<section class="for-you-section" id="for-you">
+
+    <div class="for-you-heading">
+        <div>
+            <span class="eyebrow">CURATED FOR YOU</span>
+            <h2>Made for your <span>taste.</span></h2>
+            <p>Discover films inspired by your favorite genres and ratings.</p>
+        </div>
+
+        <span class="for-you-label">CINEFILM PERSONAL PICKS</span>
+    </div>
+
+    <div class="movie-grid for-you-grid" id="for-you-grid">
+        <p class="loading">Finding films you'll love...</p>
+    </div>
+
+    <button id="for-you-load-more" type="button" hidden>
+        DISCOVER MORE FILMS ↗
+    </button>
+
+</section>
+{% endif %}
 
 <section class="search-section">
     <div>

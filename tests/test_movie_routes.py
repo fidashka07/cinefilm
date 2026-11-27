@@ -8,6 +8,7 @@ from src.extensions import db
 from src.models import Genre, Movie, Notification, User, WatchlistEntry
 from src.services.tmdb_client import TMDBError
 from datetime import date, timedelta
+import unittest.mock
 
 
 @pytest.fixture
@@ -377,3 +378,122 @@ def test_adding_same_movie_twice_does_not_create_duplicate_notification(
         assert second_response.status_code == 409
         assert Notification.query.count() == 1
         assert WatchlistEntry.query.count() == 1
+        
+def login_for_you_test_user(client, app):
+    with app.app_context():
+        user = User(
+            username="for_you_user",
+            email="foryou@example.com",
+        )
+        user.set_password("StrongPassword123")
+
+        db.session.add(user)
+        db.session.commit()
+        user_id = user.id
+
+    with client.session_transaction() as session:
+        session["_user_id"] = str(user_id)
+        session["_fresh"] = True
+
+    return user_id
+
+def test_for_you_requires_authentication(client):
+    response = client.get("/movies/for-you")
+
+    assert response.status_code == 302
+    assert "/auth/login" in response.location
+
+
+def test_for_you_returns_recommendations(client, app, monkeypatch):
+    login_for_you_test_user(client, app)
+
+    service = Mock()
+    service.get_movies_for_user.return_value = {
+        "page": 1,
+        "total_pages": 3,
+        "total_results": 2,
+        "results": [
+            {
+                "id": 550,
+                "title": "Fight Club",
+                "overview": "A movie about identity.",
+                "release_date": "1999-10-15",
+                "poster_path": "/poster.jpg",
+                "backdrop_path": "/backdrop.jpg",
+                "vote_average": 8.4,
+                "genre_ids": [18],
+            }
+        ],
+    }
+
+    monkeypatch.setattr(
+        "src.routes.movies.get_movie_service",
+        lambda: service,
+    )
+
+    response = client.get("/movies/for-you")
+
+    assert response.status_code == 200
+
+    data = response.get_json()
+
+    assert data["page"] == 1
+    assert data["total_pages"] == 3
+    assert data["total_results"] == 2
+    assert data["movies"][0]["tmdb_id"] == 550
+    assert data["movies"][0]["title"] == "Fight Club"
+
+    service.get_movies_for_user.assert_called_once()
+
+
+def test_for_you_supports_pagination(client, app, monkeypatch):
+    login_for_you_test_user(client, app)
+    service = Mock()
+    service.get_movies_for_user.return_value = {
+        "page": 2,
+        "total_pages": 3,
+        "total_results": 20,
+        "results": [],
+    }
+
+    monkeypatch.setattr(
+        "src.routes.movies.get_movie_service",
+        lambda: service,
+    )
+
+    response = client.get("/movies/for-you?page=2")
+
+    assert response.status_code == 200
+    assert response.get_json()["page"] == 2
+
+    service.get_movies_for_user.assert_called_once_with(
+        unittest.mock.ANY,
+        2,
+    )
+
+
+def test_for_you_rejects_invalid_page(client, app):
+    login_for_you_test_user(client, app)
+
+    response = client.get("/movies/for-you?page=0")
+
+    assert response.status_code == 400
+    assert response.get_json()["error"] == "Invalid page number."
+
+
+def test_for_you_handles_tmdb_error(client, app, monkeypatch):
+    login_for_you_test_user(client, app)
+    service = Mock()
+    service.get_movies_for_user.side_effect = TMDBError(
+        "API unavailable"
+    )
+
+    monkeypatch.setattr(
+        "src.routes.movies.get_movie_service",
+        lambda: service,
+    )
+
+    response = client.get("/movies/for-you")
+
+    assert response.status_code == 502
+    assert "temporarily unavailable" in response.get_json()["error"]

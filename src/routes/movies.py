@@ -130,6 +130,46 @@ def get_movies_by_mood(mood):
             "error": "Mood recommendations are temporarily unavailable."
         }), 502
 
+@movies.get("/for-you")
+@login_required
+def get_movies_for_user():
+    page = request.args.get("page", 1, type=int)
+
+    if page < 1:
+        return jsonify({"error": "Invalid page number."}), 400
+
+    try:
+        result = get_movie_service().get_movies_for_user(
+            current_user,
+            page,
+        )
+
+        return jsonify({
+            "page": result.get("page", page),
+            "total_pages": result.get("total_pages", 1),
+            "total_results": result.get("total_results", 0),
+            "movies": [
+                {
+                    "tmdb_id": movie["id"],
+                    "title": movie.get("title"),
+                    "overview": movie.get("overview"),
+                    "release_date": movie.get("release_date"),
+                    "poster_path": movie.get("poster_path"),
+                    "backdrop_path": movie.get("backdrop_path"),
+                    "vote_average": movie.get("vote_average"),
+                    "genres": movie.get("genre_ids", []),
+                }
+                for movie in result.get("results", [])
+            ],
+        })
+
+    except TMDBError:
+        current_app.logger.exception(
+            "Personalized recommendations request failed."
+        )
+        return jsonify({
+            "error": "Personalized recommendations are temporarily unavailable."
+        }), 502
 
 @movies.get("/details/<int:tmdb_id>")
 def get_movie_details(tmdb_id):

@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 
 from src.extensions import db
-from src.models import Genre, Movie
+from src.models import Genre, Movie, Rating, User, WatchlistEntry
 from src.services.movie_service import MovieService
 
 
@@ -160,3 +160,168 @@ def test_get_movies_handles_empty_results(app):
 
         assert result["movies"] == []
         assert result["total_results"] == 0
+class FakeRecommendationTMDB:
+    def __init__(self):
+        self.params = None
+
+    def get_movie_genres(self):
+        return [
+            {"id": 18, "name": "Drama"},
+            {"id": 35, "name": "Comedy"},
+            {"id": 28, "name": "Action"},
+        ]
+
+    def discover_movies(self, params):
+        self.params = params
+
+        return {
+            "page": params["page"],
+            "total_pages": 3,
+            "total_results": 4,
+            "results": [
+                {"id": 100, "title": "Already Rated"},
+                {"id": 200, "title": "Already Watchlisted"},
+                {"id": 300, "title": "Recommended One"},
+                {"id": 400, "title": "Recommended Two"},
+            ],
+        }
+
+
+def create_recommendation_user():
+    user = User(
+        username="recommendation_user",
+        email="recommendations@example.com",
+        password_hash="test-password",
+        favorite_genres=["Comedy"],
+    )
+
+    rated_movie = Movie(
+        tmdb_id=100,
+        title="Already Rated",
+        original_title="Already Rated",
+    )
+
+    rated_movie.genres.append(
+        Genre(tmdb_id=18, name="Drama")
+    )
+
+    watchlist_movie = Movie(
+        tmdb_id=200,
+        title="Already Watchlisted",
+        original_title="Already Watchlisted",
+    )
+
+    db.session.add_all([
+        user,
+        rated_movie,
+        watchlist_movie,
+    ])
+    db.session.flush()
+
+    db.session.add_all([
+        Rating(
+            user_id=user.id,
+            movie_id=rated_movie.id,
+            score=4.5,
+        ),
+        WatchlistEntry(
+            user_id=user.id,
+            movie_id=watchlist_movie.id,
+        ),
+    ])
+
+    db.session.commit()
+
+    return user
+
+
+def test_get_movies_for_user_uses_favorite_and_highly_rated_genres(app):
+    with app.app_context():
+        user = create_recommendation_user()
+        client = FakeRecommendationTMDB()
+        service = MovieService(client)
+
+        result = service.get_movies_for_user(user)
+
+        assert client.params["with_genres"] == "35|18"
+        assert client.params["sort_by"] == "popularity.desc"
+        assert client.params["include_adult"] is False
+        assert client.params["vote_count.gte"] == 50
+
+        assert result["page"] == 1
+        assert result["total_pages"] == 3
+
+
+def test_get_movies_for_user_excludes_rated_and_watchlisted_movies(app):
+    with app.app_context():
+        user = create_recommendation_user()
+        service = MovieService(FakeRecommendationTMDB())
+
+        result = service.get_movies_for_user(user)
+
+        recommended_ids = [
+            movie["id"]
+            for movie in result["results"]
+        ]
+
+        assert recommended_ids == [300, 400]
+
+
+def test_get_movies_for_user_uses_popular_fallback_without_preferences(app):
+    with app.app_context():
+        user = User(
+            username="new_user",
+            email="newuser@example.com",
+            password_hash="test-password",
+        )
+
+        db.session.add(user)
+        db.session.commit()
+
+        client = FakeRecommendationTMDB()
+        service = MovieService(client)
+
+        service.get_movies_for_user(user)
+
+        assert "with_genres" not in client.params
+        assert client.params["sort_by"] == "popularity.desc"
+
+
+def test_get_movies_for_user_supports_pagination(app):
+    with app.app_context():
+        user = User(
+            username="pagination_user",
+            email="pagination@example.com",
+            password_hash="test-password",
+        )
+
+        db.session.add(user)
+        db.session.commit()
+
+        client = FakeRecommendationTMDB()
+        service = MovieService(client)
+
+        result = service.get_movies_for_user(user, page=2)
+
+        assert client.params["page"] == 2
+        assert result["page"] == 2
+
+
+def test_get_movies_for_user_rejects_invalid_page(app):
+    with app.app_context():
+        client = FakeRecommendationTMDB()
+        service = MovieService(client)
+
+        user = User(
+            username="invalid_page_user",
+            email="invalidpage@example.com",
+            password_hash="test-password",
+        )
+
+        with pytest.raises(
+            ValueError,
+            match="Page must be greater than zero.",
+        ):
+            service.get_movies_for_user(user, page=0)
+
+        assert client.params is None
