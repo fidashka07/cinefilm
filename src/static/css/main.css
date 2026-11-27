@@ -2047,3 +2047,151 @@ footer {
         animation-iteration-count: 1 !important;
     }
 }
+
+/* ========================================
+   CINEFILM — ANIMATED 10-STAR RATING
+======================================== */
+
+.user-rating-panel {
+    margin: 30px 0;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(232, 164, 91, 0.2);
+    border-radius: 5px;
+}
+
+.user-rating-panel .eyebrow {
+    display: block;
+    margin-bottom: 15px;
+}
+
+.rating-stars {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    width: fit-content;
+}
+
+.rating-half-star {
+    position: relative;
+    width: 19px;
+    height: 36px;
+    padding: 0;
+    overflow: hidden;
+
+    border: none;
+    background: transparent;
+
+    color: #55515a;
+    font-size: 30px;
+    line-height: 36px;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease,
+        filter 0.2s ease;
+}
+
+.rating-half-star.star-left {
+    width: 15px;
+    text-align: left;
+}
+
+.rating-half-star.star-right {
+    width: 15px;
+    text-align: right;
+}
+
+.rating-half-star:hover {
+    color: #ffd477;
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 7px rgba(255, 190, 70, 0.8));
+}
+
+.rating-half-star.active {
+    color: #f5b942;
+    filter: drop-shadow(0 0 4px rgba(245, 185, 66, 0.35));
+}
+
+.rating-half-star:disabled {
+    cursor: default;
+}
+
+.rating-feedback {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.rating-score {
+    color: var(--text);
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.rating-status {
+    color: var(--muted);
+    font-size: 11px;
+    transition: color 0.3s ease;
+}
+
+.rating-success {
+    color: #8bd6a4;
+    animation: ratingSuccess 0.4s ease;
+}
+
+.rating-login-message {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.rating-celebrate .rating-half-star.active {
+    animation: starCelebrate 0.45s ease;
+}
+
+@keyframes starCelebrate {
+    0% {
+        transform: scale(1);
+    }
+
+    45% {
+        transform: scale(1.45) rotate(-8deg);
+        filter: drop-shadow(0 0 10px #f5b942);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes ratingSuccess {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 600px) {
+    .rating-half-star {
+        width: 15px;
+        font-size: 25px;
+    }
+
+    .rating-half-star.star-left,
+    .rating-half-star.star-right {
+        width: 12px;
+    }
+
+    .user-rating-panel {
+        padding: 18px;
+    }
+}

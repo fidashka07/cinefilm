@@ -560,6 +560,55 @@ async function openMovieDetails(movieId) {
                         ${escapeHTML(movie.overview || "No synopsis available.")}
                     </p>
 
+                    <div class="user-rating-panel">
+                        <span class="eyebrow">YOUR RATING</span>
+
+                        ${
+                            data.can_rate
+                            ? `
+                                <div
+                                    class="rating-stars"
+                                    data-tmdb-id="${movie.tmdb_id}"
+                                    data-current-rating="${data.user_rating || 0}"
+                                    role="group"
+                                    aria-label="Rate this movie from 0.5 to 10"
+                                >
+                                    ${Array.from({ length: 20 }, (_, index) => {
+                                        const score = (index + 1) / 2;
+                                        const halfClass = index % 2 === 0
+                                            ? "star-left"
+                                            : "star-right";
+
+                                        return `
+                                            <button
+                                                type="button"
+                                                class="rating-half-star ${halfClass}"
+                                                data-rating-value="${score}"
+                                                aria-label="${score} out of 10"
+                                                title="${score}/10"
+                                            >★</button>
+                                        `;
+                                    }).join("")}
+                                </div>
+
+                                <div class="rating-feedback">
+                                    <span class="rating-score">
+                                        ${data.user_rating
+                                            ? `${Number(data.user_rating).toFixed(1)} / 10`
+                                            : "Choose your rating"}
+                                    </span>
+
+                                    <span class="rating-status" aria-live="polite"></span>
+                                </div>
+                            `
+                            : `
+                                <p class="rating-login-message">
+                                    Log in to rate this movie.
+                                </p>
+                            `
+                        }
+                    </div>
+
                     ${
                         directors
                         ? `
@@ -611,6 +660,109 @@ async function openMovieDetails(movieId) {
     }
 }
 
+// ========================================
+// ANIMATED MOVIE RATING
+// ========================================
+
+function updateRatingStars(container, score) {
+    container.querySelectorAll(".rating-half-star").forEach(button => {
+        const value = Number(button.dataset.ratingValue);
+
+        button.classList.toggle("active", value <= score);
+    });
+
+    const scoreLabel = container
+        .closest(".user-rating-panel")
+        .querySelector(".rating-score");
+
+    scoreLabel.textContent = score
+        ? `${Number(score).toFixed(1)} / 10`
+        : "Choose your rating";
+}
+
+
+movieModal.addEventListener("mouseover", event => {
+    const button = event.target.closest(".rating-half-star");
+
+    if (!button) return;
+
+    const container = button.closest(".rating-stars");
+
+    updateRatingStars(
+        container,
+        Number(button.dataset.ratingValue)
+    );
+});
+
+
+movieModal.addEventListener("mouseleave", () => {
+    const container = movieModal.querySelector(".rating-stars");
+
+    if (!container) return;
+
+    updateRatingStars(
+        container,
+        Number(container.dataset.currentRating)
+    );
+});
+
+
+movieModal.addEventListener("click", async event => {
+    const button = event.target.closest(".rating-half-star");
+
+    if (!button) return;
+
+    const container = button.closest(".rating-stars");
+    const score = Number(button.dataset.ratingValue);
+    const tmdbId = container.dataset.tmdbId;
+
+    const panel = container.closest(".user-rating-panel");
+    const status = panel.querySelector(".rating-status");
+
+    if (!Number.isFinite(score) || !tmdbId) return;
+
+    container.querySelectorAll("button").forEach(star => {
+        star.disabled = true;
+    });
+
+    status.textContent = "Saving...";
+    status.classList.remove("rating-success");
+
+    try {
+        const response = await fetch(`/movies/${tmdbId}/rating`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken()
+            },
+            body: JSON.stringify({ score })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to save rating.");
+        }
+
+        container.dataset.currentRating = data.score;
+
+        updateRatingStars(container, data.score);
+
+        container.classList.remove("rating-celebrate");
+        void container.offsetWidth;
+        container.classList.add("rating-celebrate");
+
+        status.textContent = "✓ Rating saved";
+        status.classList.add("rating-success");
+
+    } catch (error) {
+        status.textContent = error.message;
+    } finally {
+        container.querySelectorAll("button").forEach(star => {
+            star.disabled = false;
+        });
+    }
+});
 
 // Movie selection
 

@@ -38,7 +38,8 @@ class Rating(db.Model):
             name="unique_user_movie_rating",
         ),
         db.CheckConstraint(
-            "score >= 0.5 AND score <= 5.0",
+            "score >= 0.5 AND score <= 10.0 "
+            "AND score * 2 = CAST(score * 2 AS INTEGER)",
             name="valid_rating_score",
         ),
     )

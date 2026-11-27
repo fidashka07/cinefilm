@@ -222,7 +222,7 @@ def create_recommendation_user():
         Rating(
             user_id=user.id,
             movie_id=rated_movie.id,
-            score=4.5,
+            score=9.0,
         ),
         WatchlistEntry(
             user_id=user.id,

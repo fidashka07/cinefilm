@@ -11,6 +11,7 @@ from src.repositories.movie_repository import MovieRepository
 from src.services.notification_service import NotificationService
 from src.services.movie_service import MovieService
 from src.services.tmdb_client import TMDBClient, TMDBError
+from src.models import Movie, Rating, WatchlistEntry
 
 movies = Blueprint(
     "movies",
@@ -218,6 +219,19 @@ def get_movie_details(tmdb_id):
             for item in recommendations.get("results", [])[:12]
         ]
 
+        user_rating = None
+
+        if current_user.is_authenticated:
+            rating = db.session.scalar(
+                select(Rating).where(
+                    Rating.user_id == current_user.id,
+                    Rating.movie_id == movie.id,
+                )
+            )
+
+            if rating:
+                user_rating = rating.score
+
         return jsonify({
             "movie": {
                 "id": movie.id,
@@ -241,6 +255,8 @@ def get_movie_details(tmdb_id):
             "cast": cast,
             "trailers": trailers,
             "recommendations": recommended_movies,
+            "user_rating": user_rating,
+            "can_rate": current_user.is_authenticated,
         })
 
     except TMDBError:
@@ -359,3 +375,57 @@ def remove_from_watchlist(tmdb_id):
     db.session.commit()
 
     return jsonify({"message": "Movie removed from your watchlist."})
+
+@movies.post("/<int:tmdb_id>/rating")
+@login_required
+def rate_movie(tmdb_id):
+    data = request.get_json(silent=True) or {}
+    score = data.get("score")
+
+    if isinstance(score, bool) or not isinstance(score, (int, float)):
+        return jsonify({
+            "error": "A valid rating is required."
+        }), 400
+
+    score = float(score)
+
+    if (
+        not 0.5 <= score <= 10.0
+        or not (score * 2).is_integer()
+    ):
+        return jsonify({
+            "error": "Rating must be between 0.5 and 10 in half-star increments."
+        }), 400
+
+    movie = db.session.scalar(
+        select(Movie).where(Movie.tmdb_id == tmdb_id)
+    )
+
+    if movie is None:
+        return jsonify({
+            "error": "Movie not found."
+        }), 404
+
+    rating = db.session.scalar(
+        select(Rating).where(
+            Rating.user_id == current_user.id,
+            Rating.movie_id == movie.id,
+        )
+    )
+
+    if rating:
+        rating.score = score
+    else:
+        rating = Rating(
+            user_id=current_user.id,
+            movie_id=movie.id,
+            score=score,
+        )
+        db.session.add(rating)
+
+    db.session.commit()
+
+    return jsonify({
+        "message": "Rating saved successfully.",
+        "score": rating.score,
+    }), 200

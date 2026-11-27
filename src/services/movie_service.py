@@ -92,9 +92,9 @@ class MovieService:
             if normalized and normalized not in preferred_genres:
                 preferred_genres.append(normalized)
 
-        # Add genres from movies rated 4 stars or higher.
+        # Add genres from movies rated 8/10 or higher.
         for rating in user.ratings:
-            if rating.score >= 4.0 and rating.movie:
+            if rating.score >= 8.0 and rating.movie:
                 for genre in rating.movie.genres:
                     normalized = genre.name.strip().casefold()
 

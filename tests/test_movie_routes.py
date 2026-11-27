@@ -5,7 +5,7 @@ from unittest.mock import Mock
 import pytest
 
 from src.extensions import db
-from src.models import Genre, Movie, Notification, User, WatchlistEntry
+from src.models import Genre, Movie, Notification, Rating, User, WatchlistEntry
 from src.services.tmdb_client import TMDBError
 from datetime import date, timedelta
 import unittest.mock
@@ -497,3 +497,102 @@ def test_for_you_handles_tmdb_error(client, app, monkeypatch):
 
     assert response.status_code == 502
     assert "temporarily unavailable" in response.get_json()["error"]
+
+def test_rating_endpoint_creates_new_rating(
+    client, app, sample_movie
+):
+    with app.app_context():
+        user = create_watchlist_test_user()
+        login_test_user(client, user)
+
+        movie = db.session.get(Movie, sample_movie)
+
+        response = client.post(
+            f"/movies/{movie.tmdb_id}/rating",
+            json={"score": 9.5},
+        )
+
+        assert response.status_code == 200
+        assert response.get_json()["score"] == 9.5
+
+        rating = Rating.query.filter_by(
+            user_id=user.id,
+            movie_id=movie.id,
+        ).one()
+
+        assert rating.score == 9.5
+
+
+def test_rating_endpoint_updates_existing_rating(
+    client, app, sample_movie
+):
+    with app.app_context():
+        user = create_watchlist_test_user()
+        login_test_user(client, user)
+
+        movie = db.session.get(Movie, sample_movie)
+
+        rating = Rating(
+            user_id=user.id,
+            movie_id=movie.id,
+            score=7.0,
+        )
+        db.session.add(rating)
+        db.session.commit()
+
+        response = client.post(
+            f"/movies/{movie.tmdb_id}/rating",
+            json={"score": 9.5},
+        )
+
+        assert response.status_code == 200
+        assert response.get_json()["score"] == 9.5
+        assert Rating.query.count() == 1
+        assert rating.score == 9.5
+
+
+@pytest.mark.parametrize(
+    "score",
+    [0, 10.5, 11, 4.25, "9", None, True],
+)
+def test_rating_endpoint_rejects_invalid_scores(
+    client, app, sample_movie, score
+):
+    with app.app_context():
+        user = create_watchlist_test_user()
+        login_test_user(client, user)
+
+        movie = db.session.get(Movie, sample_movie)
+
+        response = client.post(
+            f"/movies/{movie.tmdb_id}/rating",
+            json={"score": score},
+        )
+
+        assert response.status_code == 400
+        assert "error" in response.get_json()
+
+
+def test_rating_endpoint_requires_login(client, sample_movie):
+    response = client.post(
+        "/movies/550/rating",
+        json={"score": 9.0},
+    )
+
+    assert response.status_code == 302
+
+
+def test_rating_endpoint_returns_404_for_missing_movie(
+    client, app
+):
+    with app.app_context():
+        user = create_watchlist_test_user()
+        login_test_user(client, user)
+
+        response = client.post(
+            "/movies/999999/rating",
+            json={"score": 9.0},
+        )
+
+        assert response.status_code == 404
+        assert response.get_json()["error"] == "Movie not found."
