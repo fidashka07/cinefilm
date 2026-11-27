@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}My Watchlist — CINEFILM{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="notifications-page">
+    <div class="notifications-heading">
+        <div>
+            <p class="notifications-eyebrow">COMING SOON</p>
+            <h1>My Watchlist</h1>
+            <p class="notifications-subtitle">
+                Keep track of the upcoming movies you're waiting for.
+            </p>
+        </div>
+    </div>
+
+    <div class="watchlist-grid">
+        {% for movie in movies %}
+        <article class="watchlist-card" data-movie-id="{{ movie.tmdb_id }}">
+            {% if movie.poster_path %}
+            <img
+                src="https://image.tmdb.org/t/p/w342{{ movie.poster_path }}"
+                alt="{{ movie.title }} poster"
+            >
+            {% else %}
+            <div class="watchlist-no-poster">🎬</div>
+            {% endif %}
+
+            <div class="watchlist-info">
+                <h3>{{ movie.title }}</h3>
+                <p>
+                    {% if movie.release_date %}
+                    Releases {{ movie.release_date.strftime("%d %b %Y") }}
+                    {% else %}
+                    Release date unknown
+                    {% endif %}
+                </p>
+                <button class="watchlist-remove"
+                        data-id="{{ movie.tmdb_id }}">
+                    Remove
+                </button>
+            </div>
+        </article>
+        {% else %}
+        <div class="notifications-empty">
+            <span>✦</span>
+            <h2>Your watchlist is empty</h2>
+            <p>Add upcoming movies to receive release reminders.</p>
+            <a href="{{ url_for('index') }}">Discover movies</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+{% endblock %}

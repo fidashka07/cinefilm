@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications — CINEFILM{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="notifications-page">
+    <div class="notifications-heading">
+        <div>
+            <p class="notifications-eyebrow">YOUR CINEMA UNIVERSE</p>
+            <h1>Notifications</h1>
+            <p class="notifications-subtitle">Stay updated with your upcoming movies.</p>
+        </div>
+
+        {% if notifications %}
+        <button class="notification-action" id="mark-all-read">
+            Mark all as read
+        </button>
+        {% endif %}
+    </div>
+
+    <div class="notification-list">
+        {% for item in notifications %}
+        <article class="notification-card {% if not item.read_at %}unread{% endif %}"
+                 data-notification-id="{{ item.id }}">
+            <div class="notification-poster">
+                {% if item.movie.poster_path %}
+                <img
+                    src="https://image.tmdb.org/t/p/w185{{ item.movie.poster_path }}"
+                    alt="{{ item.movie.title }} poster"
+                >
+                {% else %}
+                <span>🎬</span>
+                {% endif %}
+            </div>
+
+            <div class="notification-content">
+                <p class="notification-message">{{ item.message }}</p>
+                <span class="notification-date">
+                    {{ item.created_at.strftime("%d %b %Y") }}
+                </span>
+            </div>
+
+            {% if not item.read_at %}
+            <button class="notification-action mark-read"
+                    data-id="{{ item.id }}">
+                Mark as read
+            </button>
+            {% else %}
+            <span class="read-label">Read</span>
+            {% endif %}
+        </article>
+        {% else %}
+        <div class="notifications-empty">
+            <span>✦</span>
+            <h2>You're all caught up</h2>
+            <p>Movie updates and release reminders will appear here.</p>
+            <a href="{{ url_for('index') }}">Explore movies</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+{% endblock %}

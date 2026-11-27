@@ -1,6 +1,7 @@
 from src.models.diary_entry import DiaryEntry
 from src.models.genre import Genre
 from src.models.movie import Movie
+from src.models.notification import Notification
 from src.models.rating import Rating
 from src.models.review import Review
 from src.models.user import User
@@ -10,6 +11,7 @@ __all__ = [
     "DiaryEntry",
     "Genre",
     "Movie",
+    "Notification",
     "Rating",
     "Review",
     "User",

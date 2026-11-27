@@ -78,6 +78,12 @@ class User(UserMixin, db.Model):
         secondaryjoin=id == user_follows.c.follower_id,
         back_populates="following",
     )
+    
+    notifications = db.relationship(
+    "Notification",
+    back_populates="user",
+    cascade="all, delete-orphan",
+    )
 
     @property
     def followers_count(self):

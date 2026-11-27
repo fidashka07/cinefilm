@@ -74,6 +74,12 @@ class Movie(db.Model):
         back_populates="movie",
         cascade="all, delete-orphan",
     )
+    
+    notifications = db.relationship(
+    "Notification",
+    back_populates="movie",
+    cascade="all, delete-orphan",
+    )
 
     def __repr__(self):
         return f"<Movie {self.title}>"

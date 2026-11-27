@@ -11,7 +11,7 @@ from src.extensions import (
 )
 from src.routes.auth import auth
 from src.routes.movies import movies
-
+from src.routes.notifications import notifications
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -24,7 +24,8 @@ def load_user(user_id):
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
-
+    app.register_blueprint(notifications)
+    
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
