@@ -12,7 +12,9 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    {% block styles %}{% endblock %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+
+{% block styles %}{% endblock %}
 </head>
 
 <body>
@@ -89,8 +91,9 @@
             My Watchlist
         </a>
 
-        <a href="{{ url_for('notifications.index') }}">
-            Notifications
+        <a href="{{ url_for('notifications.index') }}" class="notification-nav-link">
+        Notifications
+        <span id="notification-count" class="notification-count" hidden>0</span>
         </a>
 
         <form method="POST" action="{{ url_for('auth.logout') }}">
@@ -128,6 +131,11 @@
 
 
     <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+
+{% if current_user.is_authenticated %}
+<script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+{% endif %}
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const loader = document.getElementById("popcorn-loader");
