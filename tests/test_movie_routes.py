@@ -268,7 +268,7 @@ def test_get_movie_details_handles_tmdb_error(client, monkeypatch):
 
     assert response.status_code == 502
     assert "temporarily unavailable" in response.get_json()["error"]
-    
+
 def create_watchlist_test_user():
     user = User(
         username="watchlisttester",

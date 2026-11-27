@@ -266,12 +266,11 @@ def add_to_watchlist(tmdb_id):
 
         if movie.release_date and movie.release_date > date.today():
             NotificationService.create(
-            current_user.id,
-            movie,
-            "added_to_watchlist",
+                current_user.id,
+                movie,
+                "added_to_watchlist",
                 f"{movie.title} was added to your upcoming watchlist.",
             )
-
         db.session.commit()
 
         return jsonify({
