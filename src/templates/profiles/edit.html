@@ -52,7 +52,27 @@
             {{ form.favorite_genres(class="profile-input profile-textarea", placeholder="Drama\nThriller\nMystery") }}
 
             <label>{{ form.top_movies.label }}</label>
-            {{ form.top_movies(class="profile-input profile-textarea", placeholder="Shutter Island\nInception\nArrival\n...") }}
+
+        <div class="top-movie-picker">
+            <input
+                type="text"
+                id="top-movie-search"
+                class="profile-input"
+                placeholder="Search for a movie..."
+                autocomplete="off"
+            >
+
+            <div id="top-movie-search-results" class="top-movie-search-results"></div>
+
+            <p class="form-hint">Select up to 5 movies. You can remove or replace them anytime.</p>
+
+            <div id="selected-top-movies" class="selected-top-movies"></div>
+
+            {{ form.top_movies(
+                id="top-movies-data",
+                style="display: none;"
+            ) }}
+        </div>
 
             <label>{{ form.top_actors.label }}</label>
             {{ form.top_actors(class="profile-input profile-textarea", placeholder="Leonardo DiCaprio\nCatherine Zeta-Jones\n...") }}
@@ -78,4 +98,8 @@
 
 </section>
 
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/top_movies.js') }}"></script>
 {% endblock %}

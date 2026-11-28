@@ -1,3 +1,4 @@
+import json
 from flask import Blueprint, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
 from wtforms.validators import ValidationError
@@ -50,11 +51,38 @@ def edit_profile():
             if item.strip()
         ][:10]
 
-        current_user.top_movies = [
-            item.strip()
-            for item in form.top_movies.data.splitlines()
-            if item.strip()
-        ][:5]
+        raw_top_movies = form.top_movies.data.strip()
+
+        try:
+            selected_movies = json.loads(raw_top_movies) if raw_top_movies else []
+        except json.JSONDecodeError:
+            selected_movies = raw_top_movies.splitlines()
+
+        saved_movies = []
+
+        if isinstance(selected_movies, list):
+            for movie in selected_movies:
+                if isinstance(movie, str) and movie.strip():
+                    saved_movies.append(movie.strip())
+
+                elif isinstance(movie, dict):
+                    try:
+                        tmdb_id = int(movie.get("tmdb_id"))
+                        title = str(movie.get("title", "")).strip()
+
+                        if tmdb_id > 0 and title:
+                            saved_movies.append({
+                                "tmdb_id": tmdb_id,
+                                "title": title[:200],
+                                "poster_path": movie.get("poster_path"),
+                            })
+                    except (TypeError, ValueError):
+                        continue
+
+                if len(saved_movies) == 5:
+                    break
+
+        current_user.top_movies = saved_movies
 
         current_user.top_actors = [
             item.strip()
@@ -81,7 +109,7 @@ def edit_profile():
             current_user.favorite_genres or []
         )
 
-        form.top_movies.data = "\n".join(
+        form.top_movies.data = json.dumps(
             current_user.top_movies or []
         )
 

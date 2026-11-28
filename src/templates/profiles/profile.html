@@ -118,23 +118,37 @@
     </div>
 
     <div class="profile-section">
-        <div class="section-heading">
-            <span>02 / THE ESSENTIALS</span>
-            <h2>Top 5 movies</h2>
-        </div>
+    <div class="section-heading">
+        <span>02 / THE ESSENTIALS</span>
+        <h2>Top 5 movies</h2>
+    </div>
 
-        {% if profile.top_movies %}
-            <div class="profile-list">
-                {% for movie in profile.top_movies %}
-                    <div class="profile-list-item">
-                        <span class="list-number">0{{ loop.index }}</span>
+    {% if profile.top_movies %}
+        <div class="top-movie-profile-grid">
+            {% for movie in profile.top_movies %}
+                <div class="top-movie-profile-card">
+                    {% if movie is mapping %}
+                        {% if movie.poster_path %}
+                            <img
+                                src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}"
+                                alt="{{ movie.title }} poster"
+                            >
+                        {% else %}
+                            <div class="top-movie-no-poster">No poster</div>
+                        {% endif %}
+                        <h3>{{ movie.title }}</h3>
+                    {% else %}
+                        <div class="top-movie-no-poster">Poster unavailable</div>
                         <h3>{{ movie }}</h3>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="empty-profile">No favorite movies added yet.</p>
-        {% endif %}
+                    {% endif %}
+
+                    <span class="list-number">0{{ loop.index }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-profile">No favorite movies added yet.</p>
+    {% endif %}
     </div>
 
     <div class="profile-section">
