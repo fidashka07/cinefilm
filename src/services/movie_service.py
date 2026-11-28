@@ -18,6 +18,18 @@ class MovieService:
 
     def __init__(self, tmdb_client):
         self.tmdb = tmdb_client
+        
+    def search_movies(self, query, page=1):
+        query = query.strip()
+
+        if not query:
+            raise ValueError("Search query cannot be empty.")
+
+        if page < 1:
+            raise ValueError("Page must be greater than zero.")
+
+        return self.tmdb.search_movies(query, page)
+    
     def get_movie_details(self, tmdb_id):
         try:
             data = self.tmdb.get_movie_details(tmdb_id)

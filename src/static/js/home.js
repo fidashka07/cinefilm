@@ -813,27 +813,120 @@ function escapeHTML(value) {
 }
 
 
-document.getElementById("movie-search").addEventListener(
-    "input",
-    event => {
+// ========================================
+// TMDB MOVIE SEARCH
+// ========================================
 
-        const query = event.target.value.toLowerCase().trim();
+const searchInput = document.getElementById("movie-search");
+const searchSection = document.getElementById("search-results-section");
+const searchResults = document.getElementById("search-results");
+const searchTitle = document.getElementById("search-results-title");
+const searchStatus = document.getElementById("search-status");
+const searchLoadMore = document.getElementById("search-load-more");
 
-        collections.forEach(collection => {
+let searchTimer = null;
+let searchPage = 1;
+let searchTotalPages = 1;
+let currentSearchQuery = "";
+let searchRequestId = 0;
 
-            const movies = movieCollections[collection.endpoint] || [];
+async function searchMovies(query, page = 1, append = false) {
+    const requestId = ++searchRequestId;
 
-            const filtered = movies.filter(movie =>
-                movie.title.toLowerCase().includes(query)
-            );
+    searchLoadMore.disabled = true;
 
-            const container = document.getElementById(collection.element);
-
-            renderMovies(filtered, container);
-        });
-
+    if (!append) {
+        searchSection.hidden = false;
+        searchResults.innerHTML = "";
+        searchLoadMore.hidden = true;
+        searchStatus.textContent = "Searching movies...";
     }
-);
+
+    try {
+        const response = await fetch(
+            `/movies/search?q=${encodeURIComponent(query)}&page=${page}`
+        );
+
+        const data = await response.json();
+
+        if (requestId !== searchRequestId) {
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to search movies.");
+        }
+
+        const movies = data.movies || [];
+
+        searchPage = data.page;
+        searchTotalPages = data.total_pages;
+
+        if (!movies.length && !append) {
+            searchStatus.textContent = "No movies found.";
+            searchResults.innerHTML = "";
+            return;
+        }
+
+        if (!append) {
+            searchTitle.textContent = `Results for "${query}"`;
+        }
+
+        renderMovies(movies, searchResults, append);
+
+        searchStatus.textContent =
+            `${data.total_results} movies found`;
+
+        searchLoadMore.hidden = searchPage >= searchTotalPages;
+
+    } catch (error) {
+        if (requestId !== searchRequestId) {
+            return;
+        }
+
+        searchStatus.textContent = error.message;
+        console.error(error);
+
+    } finally {
+        if (requestId === searchRequestId) {
+            searchLoadMore.disabled = false;
+        }
+    }
+}
+
+
+searchInput.addEventListener("input", event => {
+    const query = event.target.value.trim();
+
+    clearTimeout(searchTimer);
+
+    currentSearchQuery = query;
+    searchPage = 1;
+
+    if (!query) {
+        searchRequestId++;
+        searchSection.hidden = true;
+        searchResults.innerHTML = "";
+        searchStatus.textContent = "";
+        searchLoadMore.hidden = true;
+        return;
+    }
+
+    searchTimer = setTimeout(() => {
+        searchMovies(query);
+    }, 400);
+});
+
+
+searchLoadMore.addEventListener("click", () => {
+    if (searchPage < searchTotalPages) {
+        searchMovies(
+            currentSearchQuery,
+            searchPage + 1,
+            true
+        );
+    }
+});
 
 
 // ========================================

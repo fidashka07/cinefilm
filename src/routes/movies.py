@@ -27,6 +27,45 @@ def get_movie_service():
 
     return MovieService(client)
 
+@movies.get("/search")
+def search_movies():
+    query = request.args.get("q", "").strip()
+    page = request.args.get("page", 1, type=int)
+
+    if not query:
+        return jsonify({"error": "Search query is required."}), 400
+
+    if page < 1 or page > 500:
+        return jsonify({"error": "Invalid page number."}), 400
+
+    try:
+        result = get_movie_service().search_movies(query, page)
+
+        return jsonify({
+            "page": result.get("page", page),
+            "total_pages": result.get("total_pages", 1),
+            "total_results": result.get("total_results", 0),
+            "movies": [
+                {
+                    "tmdb_id": movie["id"],
+                    "title": movie.get("title"),
+                    "overview": movie.get("overview"),
+                    "release_date": movie.get("release_date"),
+                    "poster_path": movie.get("poster_path"),
+                    "backdrop_path": movie.get("backdrop_path"),
+                    "vote_average": movie.get("vote_average"),
+                    "genres": movie.get("genre_ids", []),
+                }
+                for movie in result.get("results", [])
+            ],
+        })
+
+    except TMDBError:
+        current_app.logger.exception("TMDB movie search failed.")
+
+        return jsonify({
+            "error": "Movie search is temporarily unavailable."
+        }), 502
 
 @movies.get("/<category>")
 def get_movies(category):
