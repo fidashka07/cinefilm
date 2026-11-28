@@ -325,3 +325,56 @@ def test_get_movies_for_user_rejects_invalid_page(app):
             service.get_movies_for_user(user, page=0)
 
         assert client.params is None
+def test_get_movie_details_saves_movie_and_returns_details(app):
+    with app.app_context():
+        client = Mock()
+        client.get_movie_details.return_value = {
+            "id": 550,
+            "title": "Fight Club",
+            "original_title": "Fight Club",
+            "overview": "An ordinary man...",
+            "release_date": "1999-10-15",
+            "runtime": 139,
+            "genres": [{"id": 18, "name": "Drama"}],
+            "credits": {"cast": [], "crew": []},
+            "videos": {"results": []},
+            "recommendations": {"results": []},
+        }
+
+        service = MovieService(client)
+        result = service.get_movie_details(550)
+
+        assert result["movie"].title == "Fight Club"
+        assert result["movie"].tmdb_id == 550
+        assert result["movie"].runtime == 139
+        assert [genre.name for genre in result["movie"].genres] == [
+            "Drama"
+        ]
+        assert result["credits"] == {"cast": [], "crew": []}
+
+        assert Movie.query.filter_by(tmdb_id=550).first() is not None
+
+
+def test_get_movie_details_updates_existing_movie(app):
+    with app.app_context():
+        client = Mock()
+        client.get_movie_details.return_value = {
+            "id": 550,
+            "title": "Fight Club Updated",
+            "genres": [],
+            "credits": {},
+            "videos": {},
+            "recommendations": {},
+        }
+
+        service = MovieService(client)
+        service.get_movie_details(550)
+
+        client.get_movie_details.return_value["overview"] = "Updated overview"
+
+        result = service.get_movie_details(550)
+
+        assert result["movie"].title == "Fight Club Updated"
+        assert result["movie"].overview == "Updated overview"
+
+        assert Movie.query.filter_by(tmdb_id=550).count() == 1

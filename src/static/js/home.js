@@ -514,9 +514,11 @@ async function openMovieDetails(movieId) {
             ? `${IMAGE_BASE}w500${movie.poster_path}`
             : "";
 
-        const directors = (data.directors || [])
-            .map(person => escapeHTML(person.name))
-            .join(", ");
+       const directors = (data.directors || [])
+            .map(person => escapeHTML(
+            typeof person === "string" ? person : person.name
+        ))
+    .join(", ");
 
         const cast = (data.cast || [])
             .slice(0, 8)
@@ -738,7 +740,17 @@ movieModal.addEventListener("click", async event => {
             body: JSON.stringify({ score })
         });
 
-        const data = await response.json();
+        const responseText = await response.text();
+
+        let data;
+
+        try {
+           data = JSON.parse(responseText);
+            } catch {
+               throw new Error(
+               `Server returned HTML instead of JSON (HTTP ${response.status}). Check CSRF or login.`
+           );
+}
 
         if (!response.ok) {
             throw new Error(data.error || "Unable to save rating.");
@@ -1113,9 +1125,7 @@ document.addEventListener("click", async event => {
 });
 
 function getCSRFToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content
-        || document.querySelector('input[name="csrf_token"]')?.value
-        || "";
+    return document.querySelector('meta[name="csrf-token"]')?.content || "";
 }
 // ========================================
 // PERSONALIZED FOR YOU RECOMMENDATIONS

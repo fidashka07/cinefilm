@@ -1,17 +1,16 @@
-from flask import Blueprint, current_app, jsonify, request
 from datetime import date
 
-from flask import abort
+from flask import Blueprint, current_app, jsonify, request
 from flask_login import current_user, login_required
 from sqlalchemy import select
 
 from src.extensions import db
-from src.models import Movie, WatchlistEntry
+from src.models import Movie, Rating, WatchlistEntry
 from src.repositories.movie_repository import MovieRepository
 from src.services.notification_service import NotificationService
 from src.services.movie_service import MovieService
 from src.services.tmdb_client import TMDBClient, TMDBError
-from src.models import Movie, Rating, WatchlistEntry
+
 
 movies = Blueprint(
     "movies",
@@ -131,6 +130,7 @@ def get_movies_by_mood(mood):
             "error": "Mood recommendations are temporarily unavailable."
         }), 502
 
+
 @movies.get("/for-you")
 @login_required
 def get_movies_for_user():
@@ -171,6 +171,7 @@ def get_movies_for_user():
         return jsonify({
             "error": "Personalized recommendations are temporarily unavailable."
         }), 502
+
 
 @movies.get("/details/<int:tmdb_id>")
 def get_movie_details(tmdb_id):
@@ -266,7 +267,8 @@ def get_movie_details(tmdb_id):
         return jsonify({
             "error": "Movie details are temporarily unavailable."
         }), 502
-        
+
+
 @movies.post("/watchlist/<int:tmdb_id>")
 @login_required
 def add_to_watchlist(tmdb_id):
@@ -279,8 +281,6 @@ def add_to_watchlist(tmdb_id):
 
         if existing_movie is None:
             details = service.tmdb.get_movie_details(tmdb_id)
-
-
             genres = service.tmdb.get_movie_genres()
 
             genre_map = {
@@ -295,10 +295,8 @@ def add_to_watchlist(tmdb_id):
 
             movie = MovieRepository.save_movie(movie_data, genre_map)
             db.session.flush()
-
         else:
             movie = existing_movie
-
 
         existing_entry = db.session.scalar(
             select(WatchlistEntry).where(
@@ -327,23 +325,27 @@ def add_to_watchlist(tmdb_id):
                 "added_to_watchlist",
                 f"{movie.title} was added to your upcoming watchlist.",
             )
+
         db.session.commit()
 
         return jsonify({
-            "message": "Movie added to your watchlist.",
-            "movie_id": movie.tmdb_id,
+            "message": "Movie added to your watchlist."
         }), 201
 
     except TMDBError:
         db.session.rollback()
-        current_app.logger.exception("Unable to add movie to watchlist.")
+        current_app.logger.exception(
+            "Unable to add movie to watchlist."
+        )
         return jsonify({
             "error": "Movie service is temporarily unavailable."
         }), 502
 
     except Exception:
         db.session.rollback()
-        current_app.logger.exception("Watchlist operation failed.")
+        current_app.logger.exception(
+            "Watchlist operation failed."
+        )
         return jsonify({
             "error": "Unable to update your watchlist."
         }), 500
@@ -374,7 +376,10 @@ def remove_from_watchlist(tmdb_id):
     db.session.delete(entry)
     db.session.commit()
 
-    return jsonify({"message": "Movie removed from your watchlist."})
+    return jsonify({
+        "message": "Movie removed from your watchlist."
+    })
+
 
 @movies.post("/<int:tmdb_id>/rating")
 @login_required
@@ -389,12 +394,12 @@ def rate_movie(tmdb_id):
 
     score = float(score)
 
-    if (
-        not 0.5 <= score <= 10.0
-        or not (score * 2).is_integer()
-    ):
+    if not 0.5 <= score <= 10.0 or not (score * 2).is_integer():
         return jsonify({
-            "error": "Rating must be between 0.5 and 10 in half-star increments."
+            "error": (
+                "Rating must be between 0.5 and 10 "
+                "in half-star increments."
+            )
         }), 400
 
     movie = db.session.scalar(
@@ -423,7 +428,16 @@ def rate_movie(tmdb_id):
         )
         db.session.add(rating)
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as error:
+        db.session.rollback()
+        current_app.logger.exception(
+            "Failed to save movie rating."
+        )
+        return jsonify({
+            "error": str(error)
+        }), 500
 
     return jsonify({
         "message": "Rating saved successfully.",

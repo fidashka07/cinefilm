@@ -18,9 +18,37 @@ class MovieService:
 
     def __init__(self, tmdb_client):
         self.tmdb = tmdb_client
-
     def get_movie_details(self, tmdb_id):
-        return self.tmdb.get_movie_details(tmdb_id)
+        try:
+            data = self.tmdb.get_movie_details(tmdb_id)
+
+            genre_map = {}
+
+            for genre_data in data.get("genres", []):
+                genre = MovieRepository.get_or_create_genre(genre_data)
+                genre_map[genre.tmdb_id] = genre
+
+            movie_data = {
+                **data,
+                "genre_ids": [
+                    genre["id"] for genre in data.get("genres", [])
+                ],
+            }
+
+            movie = MovieRepository.save_movie(movie_data, genre_map)
+
+            MovieRepository.commit()
+
+            return {
+                "movie": movie,
+                "credits": data.get("credits", {}),
+                "videos": data.get("videos", {}),
+                "recommendations": data.get("recommendations", {}),
+            }
+
+        except Exception:
+            MovieRepository.rollback()
+            raise
 
     def get_movies(self, category, page=1):
         if page < 1:
