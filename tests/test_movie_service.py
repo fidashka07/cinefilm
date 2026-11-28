@@ -412,3 +412,18 @@ def test_get_movies_for_user_includes_top_movie_recommendations(app):
         ]
 
         assert recommended_ids == [500, 300, 400]
+        
+def test_get_movies_for_user_does_not_infer_genres_from_top_movies(app):
+    with app.app_context():
+        user = create_recommendation_user()
+        user.top_movies = ["Attack on Titan"]
+        db.session.commit()
+
+        client = FakeRecommendationTMDB()
+        service = MovieService(client)
+
+        service.get_movies_for_user(user)
+
+        # Top 5 movies must not automatically become genre preferences.
+        assert client.params["with_genres"] == "35|18"
+        assert "16" not in client.params["with_genres"].split("|")

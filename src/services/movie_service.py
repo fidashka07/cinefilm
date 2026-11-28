@@ -163,21 +163,30 @@ class MovieService:
         top_movie_recommendations = []
         processed_tmdb_ids = set()
 
-        for title in (user.top_movies or [])[:5]:
-            title = title.strip()
+        for movie in (user.top_movies or [])[:5]:
+            tmdb_id = None
 
-            if not title:
-                continue
+            if isinstance(movie, dict):
+                try:
+                    tmdb_id = int(movie.get("tmdb_id"))
+                except (TypeError, ValueError):
+                    continue
 
-            search_result = self.tmdb.search_movies(title)
-            search_results = search_result.get("results", [])
+            elif isinstance(movie, str):
+                title = movie.strip()
 
-            if not search_results:
-                continue
+                if not title:
+                    continue
 
-            tmdb_id = search_results[0]["id"]
+                search_result = self.tmdb.search_movies(title)
+                search_results = search_result.get("results", [])
 
-            if tmdb_id in processed_tmdb_ids:
+                if not search_results:
+                    continue
+
+                tmdb_id = search_results[0]["id"]
+
+            if not tmdb_id or tmdb_id in processed_tmdb_ids:
                 continue
 
             processed_tmdb_ids.add(tmdb_id)
@@ -190,7 +199,6 @@ class MovieService:
             top_movie_recommendations.extend(
                 recommendations.get("results", [])
             )
-
         # Exclude movies already rated or added to the watchlist.
         excluded_ids = {
             rating.movie.tmdb_id
