@@ -113,14 +113,12 @@ class MovieService:
 
         preferred_genres = []
 
-        # Add the user's selected favorite genres first.
         for name in (user.favorite_genres or []):
             normalized = name.strip().casefold()
 
             if normalized and normalized not in preferred_genres:
                 preferred_genres.append(normalized)
 
-        # Add genres from movies rated 8/10 or higher.
         for rating in user.ratings:
             if rating.score >= 8.0 and rating.movie:
                 for genre in rating.movie.genres:
@@ -149,24 +147,67 @@ class MovieService:
 
         response = self.tmdb.discover_movies(params)
 
-        # Exclude movies the user has already rated.
+        # Collect recommendations based on the user's Top 5 movies.
+        top_movie_recommendations = []
+        processed_tmdb_ids = set()
+
+        for title in (user.top_movies or [])[:5]:
+            title = title.strip()
+
+            if not title:
+                continue
+
+            search_result = self.tmdb.search_movies(title)
+            search_results = search_result.get("results", [])
+
+            if not search_results:
+                continue
+
+            tmdb_id = search_results[0]["id"]
+
+            if tmdb_id in processed_tmdb_ids:
+                continue
+
+            processed_tmdb_ids.add(tmdb_id)
+
+            recommendations = self.tmdb.get_movie_recommendations(
+                tmdb_id,
+                page=page,
+            )
+
+            top_movie_recommendations.extend(
+                recommendations.get("results", [])
+            )
+
+        # Exclude movies already rated or added to the watchlist.
         excluded_ids = {
             rating.movie.tmdb_id
             for rating in user.ratings
             if rating.movie
         }
 
-        # Exclude movies already in the user's watchlist.
         excluded_ids.update(
             entry.movie.tmdb_id
             for entry in user.watchlist_entries
             if entry.movie
         )
 
-        response["results"] = [
-            movie
-            for movie in response.get("results", [])
-            if movie["id"] not in excluded_ids
-        ]
+        # Combine both recommendation sources without duplicates.
+        combined_results = []
+        seen_ids = set()
 
+        for movie in (
+            top_movie_recommendations
+            + response.get("results", [])
+        ):
+            movie_id = movie["id"]
+
+            if movie_id in excluded_ids or movie_id in seen_ids:
+                continue
+
+            seen_ids.add(movie_id)
+            combined_results.append(movie)
+
+        response["results"] = combined_results[:20]
+        
         return response

@@ -94,3 +94,18 @@ class TMDBClient:
             "discover/movie",
             params=params or {},
         )
+        
+    def search_movies(self, query):
+        return self.get(
+        "search/movie",
+        params={
+            "query": query,
+            "include_adult": False,
+        },
+        )
+
+    def get_movie_recommendations(self, tmdb_id, page=1):
+      return self.get(
+        f"movie/{tmdb_id}/recommendations",
+        params={"page": page},
+        )

@@ -185,6 +185,22 @@ class FakeRecommendationTMDB:
                 {"id": 400, "title": "Recommended Two"},
             ],
         }
+        
+    def search_movies(self, query):
+        return {
+            "results": [
+                {"id": 999, "title": query}
+            ]
+        }
+
+    def get_movie_recommendations(self, tmdb_id, page=1):
+        return {
+            "page": page,
+            "results": [
+                {"id": 500, "title": "Top Movie Recommendation"},
+                {"id": 300, "title": "Recommended One"},
+            ],
+        }
 
 
 def create_recommendation_user():
@@ -378,3 +394,21 @@ def test_get_movie_details_updates_existing_movie(app):
         assert result["movie"].overview == "Updated overview"
 
         assert Movie.query.filter_by(tmdb_id=550).count() == 1
+
+def test_get_movies_for_user_includes_top_movie_recommendations(app):
+    with app.app_context():
+        user = create_recommendation_user()
+        user.top_movies = ["Inception"]
+        db.session.commit()
+
+        client = FakeRecommendationTMDB()
+        service = MovieService(client)
+
+        result = service.get_movies_for_user(user)
+
+        recommended_ids = [
+            movie["id"]
+            for movie in result["results"]
+        ]
+
+        assert recommended_ids == [500, 300, 400]
